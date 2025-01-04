@@ -6209,6 +6209,7 @@ AttentionProcessor = Union[
     XLAFlashAttnProcessor2_0,
     AttnProcessorNPU,
     AttnProcessor2_0,
+    CustomAttnProcessor2_0,
     MochiVaeAttnProcessor2_0,
     MochiAttnProcessor2_0,
     StableAudioAttnProcessor2_0,

@@ -27,6 +27,7 @@ from ..attention_processor import (
     AttentionProcessor,
     AttnAddedKVProcessor,
     AttnProcessor,
+    CustomAttnProcessor2_0,
 )
 from ..embeddings import TextImageProjection, TextImageTimeEmbedding, TextTimeEmbedding, TimestepEmbedding, Timesteps
 from ..modeling_utils import ModelMixin
@@ -592,6 +593,12 @@ class ControlNetModel(ModelMixin, ConfigMixin, FromOriginalModelMixin):
             )
 
         self.set_attn_processor(processor)
+
+    def set_custome_attn_processor2_0(self):
+        processor = CustomAttnProcessor2_0()
+
+        self.set_attn_processor(processor)
+
 
     # Copied from diffusers.models.unets.unet_2d_condition.UNet2DConditionModel.set_attention_slice
     def set_attention_slice(self, slice_size: Union[str, int, List[int]]) -> None:
