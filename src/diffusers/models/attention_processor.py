@@ -3417,7 +3417,8 @@ class CustomAttnProcessor2_0(torch.nn.Module):
 
                 _hidden_states = _hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                 _hidden_states = _hidden_states.to(query.dtype)
-            
+
+                print(f'mask shape={mask.shape}')
                 mask_downsample = IPAdapterMaskProcessor.downsample(
                     mask,
                     batch_size,
