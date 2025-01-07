@@ -3361,7 +3361,8 @@ class CustomAttnProcessor2_0(torch.nn.Module):
         query = attn.to_q(hidden_states)
 
         print(f'text_masks.shape={text_masks.shape}')
-        print(f'encoder_hidden_states shape={encoder_hidden_states.shape}')
+        if encoder_hidden_states is not None:
+            print(f'encoder_hidden_states shape={encoder_hidden_states.shape}')
         if text_masks is not None:
             if not text_masks.shape[0] == encoder_hidden_states.shape[0]:
                 raise ValueError(
