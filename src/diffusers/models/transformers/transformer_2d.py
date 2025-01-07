@@ -439,7 +439,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
                     **ckpt_kwargs,
                 )
             else:
-                print(f'transformer 2d encoder_hidden_states = {encoder_hidden_states.shape}')
+                #print(f'transformer 2d encoder_hidden_states = {encoder_hidden_states.shape}')
                 hidden_states = block(
                     hidden_states,
                     attention_mask=attention_mask,
