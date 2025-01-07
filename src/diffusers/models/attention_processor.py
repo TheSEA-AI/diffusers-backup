@@ -3364,17 +3364,17 @@ class CustomAttnProcessor2_0(torch.nn.Module):
             print(f'text_masks.shape={text_masks.shape}')
             print(f'encoder_hidden_states shape={encoder_hidden_states.shape}')
             if text_masks is not None:
-                if not text_masks.shape[0] == encoder_hidden_states.shape[0]:
+                if not text_masks.shape[0] == encoder_hidden_states.shape[1]:
                     raise ValueError(
                         f"Length of text_masks array ({text_masks.shape[0]}) must match "
                         f"the number of text prompts "
-                        f"({encoder_hidden_states.shape[0]})"
+                        f"({encoder_hidden_states.shape[1]})"
                     )
         
                 for index in range(text_masks.shape[0]):
                     mask = text_masks[index,:,:,:]
                     current_encoder_hidden_states = encoder_hidden_states[:,index,:,:]
-                    
+
                     print(f'current_encoder_hidden_states shape={current_encoder_hidden_states.shape}, mask shape={mask.shape}')
                     if attn.norm_cross:
                         current_encoder_hidden_states = attn.norm_encoder_hidden_states(current_encoder_hidden_states)
