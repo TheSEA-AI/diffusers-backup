@@ -1331,7 +1331,9 @@ class CustomStableDiffusionXLControlNetPipeline(
         negative_prompt_embeds_list = []
         pooled_prompt_embeds_list = []
         negative_pooled_prompt_embeds_list = []
+        
         for pmt in prompt:
+            print(f'pmt={pmt}')
             (
                 prompt_embeds,
                 negative_prompt_embeds,
@@ -1360,7 +1362,7 @@ class CustomStableDiffusionXLControlNetPipeline(
         negative_prompt_embeds_list = torch.stack(negative_prompt_embeds_list, dim=0)
         pooled_prompt_embeds_list = torch.stack(pooled_prompt_embeds_list, dim=0)
         negative_pooled_prompt_embeds_list = torch.stack(negative_pooled_prompt_embeds_list, dim=0)
-
+        print(f'prompt_embeds_list={prompt_embeds_list.shape}')
         # 3.2 Encode ip_adapter_image
         if ip_adapter_image is not None or ip_adapter_image_embeds is not None:
             
