@@ -1213,6 +1213,7 @@ class UNet2DConditionModel(
                 if is_adapter and len(down_intrablock_additional_residuals) > 0:
                     additional_residuals["additional_residuals"] = down_intrablock_additional_residuals.pop(0)
 
+                print(f'unet 2d condition encoder_hidden_states = {encoder_hidden_states.shape}')
                 sample, res_samples = downsample_block(
                     hidden_states=sample,
                     temb=emb,

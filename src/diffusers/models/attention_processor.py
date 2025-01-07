@@ -586,6 +586,7 @@ class Attention(nn.Module):
             )
         cross_attention_kwargs = {k: w for k, w in cross_attention_kwargs.items() if k in attn_parameters}
 
+        print(f'attention processor encoder_hidden_states = {encoder_hidden_states.shape}')
         return self.processor(
             self,
             hidden_states,
@@ -3358,6 +3359,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
         query = attn.to_q(hidden_states)
 
         print(f'text_masks.shape={text_masks.shape}')
+        print(f'encoder_hidden_states shape={encoder_hidden_states.shape}')
         if text_masks is not None:
             if not text_masks.shape[0] == encoder_hidden_states.shape[0]:
                 raise ValueError(
@@ -3365,7 +3367,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
                     f"the number of text prompts "
                     f"({encoder_hidden_states.shape[0]})"
                 )
-        print(f'encoder_hidden_states shape={encoder_hidden_states.shape}')
+        
         for index, (current_encoder_hidden_states, mask) in enumerate(zip(encoder_hidden_states, text_masks)):
             print(f'current_encoder_hidden_states shape={current_encoder_hidden_states.shape}, mask shape={mask.shape}')
             if attn.norm_cross:
