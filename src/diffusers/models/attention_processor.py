@@ -3364,7 +3364,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
                 )
                     
         for index, (current_encoder_hidden_states, mask) in enumerate(zip(encoder_hidden_states, text_masks)):
-            print(f'current_encoder_hidden_states shape={current_encoder_hidden_states}, mask shape={mask.shape}')
+            print(f'current_encoder_hidden_states shape={current_encoder_hidden_states.shape}, mask shape={mask.shape}')
             if attn.norm_cross:
                 current_encoder_hidden_states = attn.norm_encoder_hidden_states(current_encoder_hidden_states)
 
