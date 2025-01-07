@@ -3359,6 +3359,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
             hidden_states = attn.group_norm(hidden_states.transpose(1, 2)).transpose(1, 2)
 
         query = attn.to_q(hidden_states)
+        print(f'hidden_states={hidden_states.shape}')
 
         if encoder_hidden_states is not None:
             print(f'text_masks.shape={text_masks.shape}')
