@@ -3336,11 +3336,13 @@ class CustomAttnProcessor2_0(torch.nn.Module):
     ):
         
         residual = hidden_states
+        print(f'hidden_states1={hidden_states.shape}')
         if attn.spatial_norm is not None:
             hidden_states = attn.spatial_norm(hidden_states, temb)
 
         input_ndim = hidden_states.ndim
 
+        print(f'hidden_states2={hidden_states.shape}')
         if input_ndim == 4:
             batch_size, channel, height, width = hidden_states.shape
             hidden_states = hidden_states.view(batch_size, channel, height * width).transpose(1, 2)
@@ -3355,11 +3357,12 @@ class CustomAttnProcessor2_0(torch.nn.Module):
             # (batch, heads, source_length, target_length)
             attention_mask = attention_mask.view(batch_size, attn.heads, -1, attention_mask.shape[-1])
 
+        print(f'hidden_states3={hidden_states.shape}')
         if attn.group_norm is not None:
             hidden_states = attn.group_norm(hidden_states.transpose(1, 2)).transpose(1, 2)
 
         query = attn.to_q(hidden_states)
-        print(f'hidden_states={hidden_states.shape}')
+        print(f'hidden_states4={hidden_states.shape}')
 
         if encoder_hidden_states is not None:
             print(f'text_masks.shape={text_masks.shape}')
