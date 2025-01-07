@@ -1354,9 +1354,6 @@ class AttnAddedKVProcessor2_0:
 
         attention_mask = attn.prepare_attention_mask(attention_mask, sequence_length, batch_size, out_dim=4)
 
-        print(f'AttnAddedKVProcessor2_0 hidden_states shape={hidden_states.shape}')
-        print(f'AttnAddedKVProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
-        
         if encoder_hidden_states is None:
             encoder_hidden_states = hidden_states
         elif attn.norm_cross:
@@ -3266,7 +3263,7 @@ class AttnProcessor2_0:
         query = attn.to_q(hidden_states)
 
         print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
-        print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
+        #print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
         if encoder_hidden_states is None:
             encoder_hidden_states = hidden_states
         elif attn.norm_cross:
