@@ -586,7 +586,7 @@ class Attention(nn.Module):
             )
         cross_attention_kwargs = {k: w for k, w in cross_attention_kwargs.items() if k in attn_parameters}
 
-        print(f'attention processor encoder_hidden_states = {encoder_hidden_states.shape}')
+        #print(f'attention processor encoder_hidden_states = {encoder_hidden_states.shape}')
         return self.processor(
             self,
             hidden_states,
