@@ -1331,7 +1331,7 @@ class CrossAttnDownBlock2D(nn.Module):
                 )[0]
             else:
                 hidden_states = resnet(hidden_states, temb)
-                print(f'unet 2d blocks encoder_hidden_states = {encoder_hidden_states.shape}')
+                #print(f'unet 2d blocks encoder_hidden_states = {encoder_hidden_states.shape}')
                 hidden_states = attn(
                     hidden_states,
                     encoder_hidden_states=encoder_hidden_states,
