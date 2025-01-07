@@ -1540,7 +1540,7 @@ class CustomStableDiffusionXLControlNetPipeline(
                     }
                 else:
                     control_model_input = latent_model_input
-                    controlnet_prompt_embeds = prompt_embeds_list #prompt_embeds, modified for multiple text prompts
+                    controlnet_prompt_embeds = prompt_embeds 
                     controlnet_added_cond_kwargs = added_cond_kwargs
 
                 if isinstance(controlnet_keep[i], list):
