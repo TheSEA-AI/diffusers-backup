@@ -1354,14 +1354,14 @@ class CustomStableDiffusionXLControlNetPipeline(
                 clip_skip=self.clip_skip,
             )
             print(f'prompt_embeds shape={prompt_embeds.shape}')
-            prompt_embeds_list.append(prompt_embeds)
-            negative_prompt_embeds_list.append(negative_prompt_embeds)
-            pooled_prompt_embeds_list.append(pooled_prompt_embeds)
-            negative_pooled_prompt_embeds_list.append(negative_pooled_prompt_embeds)
-        prompt_embeds_list = torch.stack(prompt_embeds_list)
-        negative_prompt_embeds_list = torch.stack(negative_prompt_embeds_list)
-        pooled_prompt_embeds_list = torch.stack(pooled_prompt_embeds_list)
-        negative_pooled_prompt_embeds_list = torch.stack(negative_pooled_prompt_embeds_list)
+            prompt_embeds_list.append(prompt_embeds.unsqueeze(1))
+            negative_prompt_embeds_list.append(negative_prompt_embeds.unsqueeze(1))
+            pooled_prompt_embeds_list.append(pooled_prompt_embeds.unsqueeze(1))
+            negative_pooled_prompt_embeds_list.append(negative_pooled_prompt_embeds.unsqueeze(1))
+        prompt_embeds_list = torch.stack(prompt_embeds_list,dim=1)
+        negative_prompt_embeds_list = torch.stack(negative_prompt_embeds_list,dim=1)
+        pooled_prompt_embeds_list = torch.stack(pooled_prompt_embeds_list,dim=1)
+        negative_pooled_prompt_embeds_list = torch.stack(negative_pooled_prompt_embeds_list,dim=1)
         print(f'prompt_embeds_list={prompt_embeds_list.shape}')
         # 3.2 Encode ip_adapter_image
         if ip_adapter_image is not None or ip_adapter_image_embeds is not None:

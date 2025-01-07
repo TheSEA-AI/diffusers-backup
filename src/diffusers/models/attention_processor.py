@@ -3371,7 +3371,10 @@ class CustomAttnProcessor2_0(torch.nn.Module):
                         f"({encoder_hidden_states.shape[0]})"
                     )
         
-                for index, (current_encoder_hidden_states, mask) in enumerate(zip(encoder_hidden_states, text_masks)):
+                for index in range(text_masks.shape[0]):
+                    mask = text_masks[index,:,:,:]
+                    current_encoder_hidden_states = encoder_hidden_states[:,index,:,:]
+                    
                     print(f'current_encoder_hidden_states shape={current_encoder_hidden_states.shape}, mask shape={mask.shape}')
                     if attn.norm_cross:
                         current_encoder_hidden_states = attn.norm_encoder_hidden_states(current_encoder_hidden_states)
@@ -3402,6 +3405,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
                         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                         hidden_states = hidden_states.to(query.dtype)
 
+                        print(f'mask shape={mask.shape}')
                         mask_downsample = IPAdapterMaskProcessor.downsample(
                             mask,
                             batch_size,
