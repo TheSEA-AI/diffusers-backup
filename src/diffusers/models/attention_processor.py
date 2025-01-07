@@ -3357,14 +3357,14 @@ class CustomAttnProcessor2_0(torch.nn.Module):
         query = attn.to_q(hidden_states)
 
         if text_masks is not None:
-            if not text_masks.shape[0] == encoder_hidden_states.shape[0]:
+            if not text_masks.shape[0] == (encoder_hidden_states.shape[0]-1):
                 raise ValueError(
                     f"Length of text_masks array ({text_masks.shape[0]}) must match "
                     f"the number of text prompts "
-                    f"({encoder_hidden_states.shape[0]})"
+                    f"({encoder_hidden_states.shape[0]-1})"
                 )
-                    
-        for index, (current_encoder_hidden_states, mask) in enumerate(zip(encoder_hidden_states, text_masks)):
+        print(f'encoder_hidden_states shape={encoder_hidden_states.shape}')
+        for index, (current_encoder_hidden_states, mask) in enumerate(zip(encoder_hidden_states[:-1], text_masks)):
             print(f'current_encoder_hidden_states shape={current_encoder_hidden_states.shape}, mask shape={mask.shape}')
             if attn.norm_cross:
                 current_encoder_hidden_states = attn.norm_encoder_hidden_states(current_encoder_hidden_states)
