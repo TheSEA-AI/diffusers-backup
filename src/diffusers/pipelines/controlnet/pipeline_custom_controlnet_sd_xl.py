@@ -1575,7 +1575,7 @@ class CustomStableDiffusionXLControlNetPipeline(
                     added_cond_kwargs["image_embeds"] = image_embeds
 
                 # predict the noise residual
-                print(f'prompt_embeds_list={prompt_embeds_list.shape()}')
+                print(f'prompt_embeds_list={prompt_embeds_list.shape}')
                 noise_pred = self.unet(
                     latent_model_input,
                     t,
