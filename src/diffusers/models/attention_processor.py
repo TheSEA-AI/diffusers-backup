@@ -5254,6 +5254,7 @@ class IPAdapterAttnProcessor2_0(torch.nn.Module):
 
         # for ip-adapter
         print(f'ip_adapter_masks len = {len(ip_adapter_masks)}')
+        print(f'ip_hidden_states len = {len(ip_hidden_states)}')
         for current_ip_hidden_states, scale, to_k_ip, to_v_ip, mask in zip(
             ip_hidden_states, self.scale, self.to_k_ip, self.to_v_ip, ip_adapter_masks
         ):
@@ -5271,6 +5272,7 @@ class IPAdapterAttnProcessor2_0(torch.nn.Module):
                     current_num_images = mask.shape[1]
                     print(f'ip-adapter mask shape={mask.shape}')
                     for i in range(current_num_images):
+                        print(f'current_ip_hidden_states shape = {current_ip_hidden_states.shape}')
                         ip_key = to_k_ip(current_ip_hidden_states[:, i, :, :])
                         ip_value = to_v_ip(current_ip_hidden_states[:, i, :, :])
 
