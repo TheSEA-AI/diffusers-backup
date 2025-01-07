@@ -3363,13 +3363,13 @@ class CustomAttnProcessor2_0(torch.nn.Module):
         print(f'text_masks.shape={text_masks.shape}')
         if encoder_hidden_states is not None:
             print(f'encoder_hidden_states shape={encoder_hidden_states.shape}')
-        if text_masks is not None:
-            if not text_masks.shape[0] == encoder_hidden_states.shape[0]:
-                raise ValueError(
-                    f"Length of text_masks array ({text_masks.shape[0]}) must match "
-                    f"the number of text prompts "
-                    f"({encoder_hidden_states.shape[0]})"
-                )
+            if text_masks is not None:
+                if not text_masks.shape[0] == encoder_hidden_states.shape[0]:
+                    raise ValueError(
+                        f"Length of text_masks array ({text_masks.shape[0]}) must match "
+                        f"the number of text prompts "
+                        f"({encoder_hidden_states.shape[0]})"
+                    )
         
         for index, (current_encoder_hidden_states, mask) in enumerate(zip(encoder_hidden_states, text_masks)):
             print(f'current_encoder_hidden_states shape={current_encoder_hidden_states.shape}, mask shape={mask.shape}')
