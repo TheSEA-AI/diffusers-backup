@@ -29,6 +29,7 @@ from .controlnet import (
     StableDiffusionXLControlNetImg2ImgPipeline,
     StableDiffusionXLControlNetInpaintPipeline,
     StableDiffusionXLControlNetPipeline,
+    CustomStableDiffusionXLControlNetPipeline,
     StableDiffusionXLControlNetUnionImg2ImgPipeline,
     StableDiffusionXLControlNetUnionInpaintPipeline,
     StableDiffusionXLControlNetUnionPipeline,
