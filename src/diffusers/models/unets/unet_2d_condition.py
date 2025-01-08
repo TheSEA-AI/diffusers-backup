@@ -1214,7 +1214,7 @@ class UNet2DConditionModel(
                     additional_residuals["additional_residuals"] = down_intrablock_additional_residuals.pop(0)
 
                 #print(f'unet 2d condition encoder_hidden_states = {encoder_hidden_states.shape}')
-                print(f'unet 2d block emb shape = {emb.shape}')
+                print(f'unet 2d condition emb shape = {emb.shape}')
                 print(f'unet 2d condition hidden_states shape = {sample.shape}')
                 sample, res_samples = downsample_block(
                     hidden_states=sample,
