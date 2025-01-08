@@ -514,7 +514,7 @@ class BasicTransformerBlock(nn.Module):
         #print(f'attention encoder_hidden_states = {encoder_hidden_states.shape}')
         attn_output = self.attn1(
             norm_hidden_states,
-            encoder_hidden_states=encoder_hidden_states if len(encoder_hidden_states.shape) == 4 else None, #if self.only_cross_attention else None, #
+            encoder_hidden_states=encoder_hidden_states if self.only_cross_attention else None, #if len(encoder_hidden_states.shape) == 4 else None, 
             attention_mask=attention_mask,
             **cross_attention_kwargs,
         )
