@@ -1338,6 +1338,7 @@ class CrossAttnDownBlock2D(nn.Module):
                 )[0]
             else:
                 print(f'unet 2d block temb shape = {temb.shape}')
+                print(f'unet 2d block hidden_states shape = {hidden_states.shape}')
                 if len(temb.shape) == 3:
                     hidden_states = resnet(hidden_states, temb)
                 else:
