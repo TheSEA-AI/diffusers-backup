@@ -387,7 +387,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
         # this helps to broadcast it as a bias over attention scores, which will be in one of the following shapes:
         #   [batch,  heads, query_tokens, key_tokens] (e.g. torch sdp attn)
         #   [batch * heads, query_tokens, key_tokens] (e.g. xformers or classic attn)
-        print(f'transformer 2d hidden_states shape = {hidden_states.shape}')
+        print(f'transformer 2d hidden_states shape 1 = {hidden_states.shape}')
         if attention_mask is not None and attention_mask.ndim == 2:
             # assume that mask is expressed as:
             #   (1 = keep,      0 = discard)
@@ -406,14 +406,17 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
             batch_size, _, height, width = hidden_states.shape
             residual = hidden_states
             hidden_states, inner_dim = self._operate_on_continuous_inputs(hidden_states)
+            print(f'transformer 2d hidden_states shape 2 = {hidden_states.shape}')
         elif self.is_input_vectorized:
             hidden_states = self.latent_image_embedding(hidden_states)
+            print(f'transformer 2d hidden_states shape 3 = {hidden_states.shape}')
         elif self.is_input_patches:
             height, width = hidden_states.shape[-2] // self.patch_size, hidden_states.shape[-1] // self.patch_size
             hidden_states, encoder_hidden_states, timestep, embedded_timestep = self._operate_on_patched_inputs(
                 hidden_states, encoder_hidden_states, timestep, added_cond_kwargs
             )
-
+            print(f'transformer 2d hidden_states shape 4 = {hidden_states.shape}')
+        
         # 2. Blocks
         for block in self.transformer_blocks:
             if torch.is_grad_enabled() and self.gradient_checkpointing:
@@ -450,6 +453,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
                     cross_attention_kwargs=cross_attention_kwargs,
                     class_labels=class_labels,
                 )
+                print(f'transformer 2d hidden_states shape 5 = {hidden_states.shape}')
 
         # 3. Output
         if self.is_input_continuous:

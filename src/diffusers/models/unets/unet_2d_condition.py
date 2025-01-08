@@ -1214,6 +1214,8 @@ class UNet2DConditionModel(
                     additional_residuals["additional_residuals"] = down_intrablock_additional_residuals.pop(0)
 
                 #print(f'unet 2d condition encoder_hidden_states = {encoder_hidden_states.shape}')
+                print(f'unet 2d block emb shape = {emb.shape}')
+                print(f'unet 2d condition hidden_states shape = {sample.shape}')
                 sample, res_samples = downsample_block(
                     hidden_states=sample,
                     temb=emb,
@@ -2427,7 +2429,7 @@ class CustomUNet2DConditionModel(
                 for _emb in emb_list:
                     _emb = self.time_embed_act(_emb)
             emb_list = torch.stack(emb_list,dim=1)
-            
+
         # added to consider multiple encoder_hidden_states because of multiple text prompts
         if len(encoder_hidden_states.shape) == 3:
             encoder_hidden_states = self.process_encoder_hidden_states(

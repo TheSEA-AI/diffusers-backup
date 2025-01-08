@@ -504,6 +504,8 @@ class BasicTransformerBlock(nn.Module):
         else:
             raise ValueError("Incorrect norm used")
 
+        print(f'attention norm_hidden_states shape = {norm_hidden_states.shape}')
+
         if self.pos_embed is not None:
             norm_hidden_states = self.pos_embed(norm_hidden_states)
 

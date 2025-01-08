@@ -917,16 +917,16 @@ class UNetMidBlock2DCrossAttn(nn.Module):
                     encoder_attention_mask=encoder_attention_mask,
                     return_dict=False,
                 )[0]
-                if len(temb.shape) == 3:
-                    hidden_states = resnet(hidden_states, temb)
-                else:
-                    hidden_states_list = []
-                    for index in range(temb.shape[1]):
-                        _hidden_states = resnet(hidden_states, temb[:,index,:,:])
-                        hidden_states_list.append(_hidden_states)
-                    hidden_states_list = torch.stack(hidden_states_list,dim=1)
+                #if len(temb.shape) == 3:
+                hidden_states = resnet(hidden_states, temb)
+                #else:
+                #    hidden_states_list = []
+                #    for index in range(temb.shape[1]):
+                #        _hidden_states = resnet(hidden_states, temb[:,index,:,:])
+                #        hidden_states_list.append(_hidden_states)
+                #    hidden_states_list = torch.stack(hidden_states_list,dim=1)
 
-        return hidden_states if len(temb.shape) == 3 else hidden_states_list
+        return hidden_states #if len(temb.shape) == 3 else hidden_states_list
 
 
 class UNetMidBlock2DSimpleCrossAttn(nn.Module):
@@ -1339,17 +1339,17 @@ class CrossAttnDownBlock2D(nn.Module):
             else:
                 print(f'unet 2d block temb shape = {temb.shape}')
                 print(f'unet 2d block hidden_states shape = {hidden_states.shape}')
-                if len(temb.shape) == 3:
-                    hidden_states = resnet(hidden_states, temb)
-                else:
-                    hidden_states_list = []
-                    for index in range(temb.shape[1]):
-                        _hidden_states = resnet(hidden_states, temb[:,index,:,:])
-                        hidden_states_list.append(_hidden_states)
-                    hidden_states_list = torch.stack(hidden_states_list,dim=1)
+                #if len(temb.shape) == 3:
+                hidden_states = resnet(hidden_states, temb)
+                #else:
+                #    hidden_states_list = []
+                #    for index in range(temb.shape[1]):
+                #        _hidden_states = resnet(hidden_states, temb[:,index,:,:])
+                #        hidden_states_list.append(_hidden_states)
+                #    hidden_states_list = torch.stack(hidden_states_list,dim=1)
                 #print(f'unet 2d blocks encoder_hidden_states = {encoder_hidden_states.shape}')
                 hidden_states = attn(
-                    hidden_states if len(temb.shape) == 3 else hidden_states_list,
+                    hidden_states,# if len(temb.shape) == 3 else hidden_states_list,
                     encoder_hidden_states=encoder_hidden_states,
                     cross_attention_kwargs=cross_attention_kwargs,
                     attention_mask=attention_mask,
@@ -2631,16 +2631,16 @@ class CrossAttnUpBlock2D(nn.Module):
                     return_dict=False,
                 )[0]
             else:
-                if len(temb.shape) == 3:
-                    hidden_states = resnet(hidden_states, temb)
-                else:
-                    hidden_states_list = []
-                    for index in range(temb.shape[1]):
-                        _hidden_states = resnet(hidden_states, temb[:,index,:,:])
-                        hidden_states_list.append(_hidden_states)
-                    hidden_states_list = torch.stack(hidden_states_list,dim=1)
+                #if len(temb.shape) == 3:
+                hidden_states = resnet(hidden_states, temb)
+                #else:
+                #    hidden_states_list = []
+                #    for index in range(temb.shape[1]):
+                #        _hidden_states = resnet(hidden_states, temb[:,index,:,:])
+                #        hidden_states_list.append(_hidden_states)
+                #    hidden_states_list = torch.stack(hidden_states_list,dim=1)
                 hidden_states = attn(
-                    hidden_states if len(temb.shape) == 3 else hidden_states_list,
+                    hidden_states, #if len(temb.shape) == 3 else hidden_states_list,
                     encoder_hidden_states=encoder_hidden_states,
                     cross_attention_kwargs=cross_attention_kwargs,
                     attention_mask=attention_mask,
