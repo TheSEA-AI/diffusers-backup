@@ -3384,6 +3384,8 @@ class CustomAttnProcessor2_0(torch.nn.Module):
                     if attn.norm_cross:
                         current_encoder_hidden_states = attn.norm_encoder_hidden_states(current_encoder_hidden_states)
 
+                    print(f'attn.to_k.weight.size()={attn.to_k.weight.size()}') 
+                    print(f'attn.to_v.weight.size()={attn.to_v.weight.size()}') 
                     key = attn.to_k(current_encoder_hidden_states)
                     value = attn.to_v(current_encoder_hidden_states)
 
