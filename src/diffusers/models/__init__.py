@@ -66,7 +66,7 @@ if is_torch_available():
     _import_structure["transformers.sana_transformer"] = ["SanaTransformer2DModel"]
     _import_structure["transformers.stable_audio_transformer"] = ["StableAudioDiTModel"]
     _import_structure["transformers.t5_film_transformer"] = ["T5FilmDecoder"]
-    _import_structure["transformers.transformer_2d"] = ["Transformer2DModel"]
+    _import_structure["transformers.transformer_2d"] = ["Transformer2DModel", "CustomTransformer2DModel"]
     _import_structure["transformers.transformer_allegro"] = ["AllegroTransformer3DModel"]
     _import_structure["transformers.transformer_cogview3plus"] = ["CogView3PlusTransformer2DModel"]
     _import_structure["transformers.transformer_flux"] = ["FluxTransformer2DModel"]
@@ -77,7 +77,7 @@ if is_torch_available():
     _import_structure["transformers.transformer_temporal"] = ["TransformerTemporalModel"]
     _import_structure["unets.unet_1d"] = ["UNet1DModel"]
     _import_structure["unets.unet_2d"] = ["UNet2DModel"]
-    _import_structure["unets.unet_2d_condition"] = ["UNet2DConditionModel"]
+    _import_structure["unets.unet_2d_condition"] = ["UNet2DConditionModel", "CustomUNet2DConditionModel"]
     _import_structure["unets.unet_3d_condition"] = ["UNet3DConditionModel"]
     _import_structure["unets.unet_i2vgen_xl"] = ["I2VGenXLUNet"]
     _import_structure["unets.unet_kandinsky3"] = ["Kandinsky3UNet"]
@@ -151,6 +151,7 @@ if TYPE_CHECKING or DIFFUSERS_SLOW_IMPORT:
             StableAudioDiTModel,
             T5FilmDecoder,
             Transformer2DModel,
+            CustomTransformer2DModel,
             TransformerTemporalModel,
         )
         from .unets import (
@@ -160,6 +161,7 @@ if TYPE_CHECKING or DIFFUSERS_SLOW_IMPORT:
             StableCascadeUNet,
             UNet1DModel,
             UNet2DConditionModel,
+            CustomUNet2DConditionModel,
             UNet2DModel,
             UNet3DConditionModel,
             UNetMotionModel,

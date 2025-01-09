@@ -1411,7 +1411,7 @@ class CustomUNet2DConditionModel(
     """
 
     _supports_gradient_checkpointing = True
-    _no_split_modules = ["BasicTransformerBlock", "ResnetBlock2D", "CrossAttnUpBlock2D"]
+    _no_split_modules = ["BasicTransformerBlock", "ResnetBlock2D", "CustomCrossAttnUpBlock2D"]
 
     @register_to_config
     def __init__(
@@ -1423,13 +1423,13 @@ class CustomUNet2DConditionModel(
         flip_sin_to_cos: bool = True,
         freq_shift: int = 0,
         down_block_types: Tuple[str] = (
-            "CrossAttnDownBlock2D",
-            "CrossAttnDownBlock2D",
-            "CrossAttnDownBlock2D",
+            "CustomCrossAttnDownBlock2D",
+            "CustomCrossAttnDownBlock2D",
+            "CustomCrossAttnDownBlock2D",
             "DownBlock2D",
         ),
-        mid_block_type: Optional[str] = "UNetMidBlock2DCrossAttn",
-        up_block_types: Tuple[str] = ("UpBlock2D", "CrossAttnUpBlock2D", "CrossAttnUpBlock2D", "CrossAttnUpBlock2D"),
+        mid_block_type: Optional[str] = "CustomUNetMidBlock2DCrossAttn",
+        up_block_types: Tuple[str] = ("UpBlock2D", "CustomCrossAttnUpBlock2D", "CustomCrossAttnUpBlock2D", "CustomCrossAttnUpBlock2D"),
         only_cross_attention: Union[bool, Tuple[bool]] = False,
         block_out_channels: Tuple[int] = (320, 640, 1280, 1280),
         layers_per_block: Union[int, Tuple[int]] = 2,
@@ -2402,9 +2402,9 @@ class CustomUNet2DConditionModel(
             )
         else:
             aug_emb_list = []
-            for index in range(encoder_hidden_states.shape[0]):
+            for index in range(encoder_hidden_states.shape[1]):
                 aug_emb = self.get_aug_embed(
-                    emb=emb, encoder_hidden_states=encoder_hidden_states[index,:,:,:], added_cond_kwargs=added_cond_kwargs
+                    emb=emb, encoder_hidden_states=encoder_hidden_states[:,index,:,:], added_cond_kwargs=added_cond_kwargs
                 )
             aug_emb_list.append(aug_emb)
 
@@ -2436,9 +2436,9 @@ class CustomUNet2DConditionModel(
                 encoder_hidden_states=encoder_hidden_states, added_cond_kwargs=added_cond_kwargs
             )
         else:
-            for index in range(encoder_hidden_states.shape[0]):
-                encoder_hidden_states[index,:,:,:] = self.process_encoder_hidden_states(
-                    encoder_hidden_states=encoder_hidden_states[index,:,:,:], added_cond_kwargs=added_cond_kwargs
+            for index in range(encoder_hidden_states.shape[1]):
+                encoder_hidden_states[:,index,:,:] = self.process_encoder_hidden_states(
+                    encoder_hidden_states=encoder_hidden_states[:,index,:,:], added_cond_kwargs=added_cond_kwargs
                 )   
 
         # 2. pre-process

@@ -41,7 +41,7 @@ from ...loaders import (
     TextualInversionLoaderMixin,
 )
 
-from ...models import AutoencoderKL, ControlNetModel, ImageProjection, MultiControlNetModel, ImageProjectionCustomized, UNet2DConditionModel
+from ...models import AutoencoderKL, ControlNetModel, ImageProjection, MultiControlNetModel, ImageProjectionCustomized, CustomUNet2DConditionModel
 
 
 from ...models.attention_processor import (
@@ -266,7 +266,7 @@ class CustomStableDiffusionXLControlNetPipeline(
         text_encoder_2: CLIPTextModelWithProjection,
         tokenizer: CLIPTokenizer,
         tokenizer_2: CLIPTokenizer,
-        unet: UNet2DConditionModel,
+        unet: CustomUNet2DConditionModel,
         controlnet: Union[ControlNetModel, List[ControlNetModel], Tuple[ControlNetModel], MultiControlNetModel],
         scheduler: KarrasDiffusionSchedulers,
         safety_checker: StableDiffusionSafetyChecker,

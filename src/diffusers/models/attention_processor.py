@@ -3409,6 +3409,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
             return hidden_states
         else:
             hidden_states_list = []
+            residual = torch.mean(hidden_states, dim=1, keepdim=False) # modified to use the mean of hidden_states
             if not len(text_masks.shape[0]) == hidden_states.shape[1]:
                 raise ValueError(
                     f"Length of text masks ({len(text_masks.shape[0])}) must match "
@@ -3417,7 +3418,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
 
             for index in range(hidden_states.shape[1]):
                 _hidden_states = hidden_states[:,index,:,:]
-                residual = _hidden_states
+                
                 if attn.spatial_norm is not None:
                     _hidden_states = attn.spatial_norm(_hidden_states, temb)
 
@@ -3484,9 +3485,8 @@ class CustomAttnProcessor2_0(torch.nn.Module):
                 mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
                 hidden_states_list.append(_hidden_states * mask_downsample)
 
-            hidden_states = hidden_states_list[0]
-            for index in range(1, len(hidden_states_list)):
-                hidden_states += hidden_states_list[index]
+            hidden_states_list = torch.stack(hidden_states_list)
+            hidden_states = torch.sum(hidden_states_list, dim=0, keepdim=False)
             
             # linear proj
             hidden_states = attn.to_out[0](hidden_states)

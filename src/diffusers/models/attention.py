@@ -857,7 +857,7 @@ class CustomBasicTransformerBlock(nn.Module):
                     norm_hidden_states = norm_hidden_states * (1 + scale_msa) + shift_msa
                 else:
                     raise ValueError("Incorrect norm used")
-            norm_hidden_states_list.append(norm_hidden_states)
+                norm_hidden_states_list.append(norm_hidden_states)
 
         #print(f'attention norm_hidden_states shape = {norm_hidden_states.shape}')
 
@@ -887,9 +887,10 @@ class CustomBasicTransformerBlock(nn.Module):
         elif self.norm_type == "ada_norm_single":
             attn_output = gate_msa * attn_output
 
-        if len(hidden_states.shape) == 3:
-            hidden_states = attn_output + hidden_states
-         ##else to be done    
+        if hidden_states.ndim == 4:
+            hidden_states = torch.mean(hidden_states, dim=1, keepdim=False)
+        
+        hidden_states = attn_output + hidden_states
 
         if hidden_states.ndim == 4:
             hidden_states = hidden_states.squeeze(1)
@@ -900,6 +901,7 @@ class CustomBasicTransformerBlock(nn.Module):
 
         # 3. Cross-Attention
         if self.attn2 is not None:
+            print(f'the second Cross-Attention is applied')
             if self.norm_type == "ada_norm":
                 norm_hidden_states = self.norm2(hidden_states, timestep)
             elif self.norm_type in ["ada_norm_zero", "layer_norm", "layer_norm_i2vgen"]:
