@@ -868,7 +868,7 @@ class BasicTransformerBlock(nn.Module):
                 for _norm_hidden_states in norm_hidden_states_list:
                     _norm_hidden_states = self.pos_embed(_norm_hidden_states)
 
-        norm_hidden_states_list = torch.stack(norm_hidden_states_list, dim=1)
+                norm_hidden_states_list = torch.stack(norm_hidden_states_list, dim=1)
 
         # 1. Prepare GLIGEN inputs
         cross_attention_kwargs = cross_attention_kwargs.copy() if cross_attention_kwargs is not None else {}
