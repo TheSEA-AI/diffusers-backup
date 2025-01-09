@@ -575,7 +575,7 @@ class Attention(nn.Module):
         # For standard processors that are defined here, `**cross_attention_kwargs` is empty
 
         attn_parameters = set(inspect.signature(self.processor.__call__).parameters.keys())
-        print(f'attn_parameters={attn_parameters}')
+        #print(f'attn_parameters={attn_parameters}')
         quiet_attn_parameters = {"text_masks", "ip_adapter_masks", "ip_hidden_states"}
         unused_kwargs = [
             k for k, _ in cross_attention_kwargs.items() if k not in attn_parameters and k not in quiet_attn_parameters
@@ -3214,7 +3214,7 @@ class AttnProcessorNPU:
         return hidden_states
 
 
-class AttnProcessor2_0:
+class CustomAttnProcessor2_0:
     r"""
     Processor for implementing scaled dot-product attention (enabled by default if you're using PyTorch 2.0).
     """
@@ -3262,7 +3262,7 @@ class AttnProcessor2_0:
 
         query = attn.to_q(hidden_states)
 
-        print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
+        #print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
         #print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
         if encoder_hidden_states is None:
             encoder_hidden_states = hidden_states
@@ -3309,7 +3309,7 @@ class AttnProcessor2_0:
 
         return hidden_states
 
-class CustomAttnProcessor2_0(torch.nn.Module):
+class AttnProcessor2_0(torch.nn.Module):
     r"""
     Custom Attention processor for Text Prompt Mask for PyTorch 2.0.
 
@@ -3334,7 +3334,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
         temb: Optional[torch.Tensor] = None,
         text_masks: Optional[torch.Tensor] = None,
     ):
-        
+        print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
         if len(hidden_states.shape) == 3:
             residual = hidden_states
             if attn.spatial_norm is not None:
@@ -3361,7 +3361,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
 
             query = attn.to_q(hidden_states)
 
-            print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
+            #print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
             #print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
             if encoder_hidden_states is None:
                 encoder_hidden_states = hidden_states
@@ -3443,7 +3443,7 @@ class CustomAttnProcessor2_0(torch.nn.Module):
 
                 query = attn.to_q(_hidden_states)
 
-                print(f'AttnProcessor2_0 hidden_states shape={_hidden_states.shape}')
+                #print(f'AttnProcessor2_0 _hidden_states shape={_hidden_states.shape}')
                 #print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
                 if encoder_hidden_states is None:
                     encoder_hidden_states = _hidden_states
