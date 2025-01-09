@@ -2425,7 +2425,7 @@ class UNet2DConditionModel(
             else:
                 for _emb in emb_list:
                     _emb = self.time_embed_act(_emb)
-            emb_list = torch.stack(emb_list,dim=1)
+        emb_list = torch.stack(emb_list,dim=1)
 
         # added to consider multiple encoder_hidden_states because of multiple text prompts
         if len(encoder_hidden_states.shape) == 3:
