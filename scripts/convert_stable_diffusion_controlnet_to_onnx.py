@@ -16,7 +16,7 @@ from diffusers import (
     StableDiffusionControlNetImg2ImgPipeline,
 )
 from diffusers.models.attention_processor import AttnProcessor
-from diffusers.pipelines.controlnet.pipeline_controlnet_sd_xl import StableDiffusionXLControlNetPipeline
+from diffusers.pipelines.controlnet.pipeline_custom_controlnet_sd_xl import StableDiffusionXLControlNetPipeline
 
 
 is_torch_less_than_1_11 = version.parse(version.parse(torch.__version__).base_version) < version.parse("1.11")

@@ -2392,6 +2392,7 @@ class UNet2DConditionModel(
             else:
                 emb = emb + class_emb
         
+        print(f'unet 2d condition encoder_hidden_states shape={encoder_hidden_states.shape}')
         # added to consider multiple encoder_hidden_states because of multiple text prompts
         if len(encoder_hidden_states.shape) == 3:
             aug_emb = self.get_aug_embed(
