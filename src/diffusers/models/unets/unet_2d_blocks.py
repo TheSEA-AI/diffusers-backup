@@ -764,7 +764,7 @@ class UNetMidBlock2D(nn.Module):
         return hidden_states
 
 
-class UNetMidBlock2DCrossAttn(nn.Module):
+class CustomUNetMidBlock2DCrossAttn(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -921,7 +921,7 @@ class UNetMidBlock2DCrossAttn(nn.Module):
                 
         return hidden_states 
 
-class CustomUNetMidBlock2DCrossAttn(nn.Module):
+class UNetMidBlock2DCrossAttn(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -1356,7 +1356,7 @@ class AttnDownBlock2D(nn.Module):
         return hidden_states, output_states
 
 
-class CrossAttnDownBlock2D(nn.Module):
+class CustomCrossAttnDownBlock2D(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -1519,7 +1519,7 @@ class CrossAttnDownBlock2D(nn.Module):
         return hidden_states, output_states
 
 
-class CustomCrossAttnDownBlock2D(nn.Module):
+class CrossAttnDownBlock2D(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -2792,7 +2792,7 @@ class AttnUpBlock2D(nn.Module):
         return hidden_states
 
 
-class CrossAttnUpBlock2D(nn.Module):
+class CustomCrossAttnUpBlock2D(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -2968,7 +2968,7 @@ class CrossAttnUpBlock2D(nn.Module):
         return hidden_states
 
 
-class CustomCrossAttnUpBlock2D(nn.Module):
+class CrossAttnUpBlock2D(nn.Module):
     def __init__(
         self,
         in_channels: int,

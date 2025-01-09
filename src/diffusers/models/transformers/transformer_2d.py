@@ -36,7 +36,7 @@ class Transformer2DModelOutput(Transformer2DModelOutput):
         super().__init__(*args, **kwargs)
 
 
-class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
+class CustomTransformer2DModel(LegacyModelMixin, LegacyConfigMixin):
     """
     A 2D Transformer model for image-like data.
 
@@ -566,7 +566,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
         return output
 
 
-class CustomTransformer2DModel(LegacyModelMixin, LegacyConfigMixin):
+class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
     """
     A 2D Transformer model for image-like data.
 

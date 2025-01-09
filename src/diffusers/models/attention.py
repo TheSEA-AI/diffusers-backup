@@ -258,7 +258,7 @@ class JointTransformerBlock(nn.Module):
 
 
 @maybe_allow_in_graph
-class BasicTransformerBlock(nn.Module):
+class CustomBasicTransformerBlock(nn.Module):
     r"""
     A basic Transformer block.
 
@@ -590,7 +590,7 @@ class BasicTransformerBlock(nn.Module):
 
 
 @maybe_allow_in_graph
-class CustomBasicTransformerBlock(nn.Module):
+class BasicTransformerBlock(nn.Module):
     r"""
     A basic Transformer block.
 
