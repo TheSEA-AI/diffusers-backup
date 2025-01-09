@@ -1213,9 +1213,6 @@ class UNet2DConditionModel(
                 if is_adapter and len(down_intrablock_additional_residuals) > 0:
                     additional_residuals["additional_residuals"] = down_intrablock_additional_residuals.pop(0)
 
-                #print(f'unet 2d condition encoder_hidden_states = {encoder_hidden_states.shape}')
-                print(f'unet 2d condition emb shape = {emb.shape}')
-                print(f'unet 2d condition hidden_states shape = {sample.shape}')
                 sample, res_samples = downsample_block(
                     hidden_states=sample,
                     temb=emb,
@@ -1411,7 +1408,7 @@ class CustomUNet2DConditionModel(
     """
 
     _supports_gradient_checkpointing = True
-    _no_split_modules = ["BasicTransformerBlock", "ResnetBlock2D", "CustomCrossAttnUpBlock2D"]
+    _no_split_modules = ["CustomBasicTransformerBlock", "ResnetBlock2D", "CustomCrossAttnUpBlock2D"]
 
     @register_to_config
     def __init__(
