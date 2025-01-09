@@ -3410,9 +3410,9 @@ class CustomAttnProcessor2_0(torch.nn.Module):
         else:
             hidden_states_list = []
             residual = torch.mean(hidden_states, dim=1, keepdim=False) # modified to use the mean of hidden_states
-            if not len(text_masks.shape[0]) == hidden_states.shape[1]:
+            if not text_masks.shape[0] == hidden_states.shape[1]:
                 raise ValueError(
-                    f"Length of text masks ({len(text_masks.shape[0])}) must match "
+                    f"Length of text masks ({text_masks.shape[0]}) must match "
                     f"the number of text prompts "
                     f"({hidden_states.shape[1]})")
 
