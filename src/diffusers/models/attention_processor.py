@@ -3335,8 +3335,9 @@ class AttnProcessor2_0(torch.nn.Module):
         text_masks: Optional[torch.Tensor] = None,
     ):
         print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
-        print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states}')
-        if (encoder_hidden_states is not None) and (encoder_hidden_states.ndim == 4):
+        if encoder_hidden_states is not None:
+            print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
+        if (hidden_states.ndim == 4) or ((encoder_hidden_states is not None) and (encoder_hidden_states.ndim == 4)):
             hidden_states_list = []
             residual = torch.mean(hidden_states, dim=1, keepdim=False) # modified to use the mean of hidden_states
             if not text_masks.shape[0] == hidden_states.shape[1]:
