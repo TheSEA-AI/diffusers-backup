@@ -891,12 +891,15 @@ class BasicTransformerBlock(nn.Module):
             attn_output = gate_msa * attn_output
 
         if hidden_states.ndim == 4:
-            hidden_states = torch.mean(hidden_states, dim=1, keepdim=False)
+            hidden_states = hidden_states.squeeze(1)
         
-        hidden_states = attn_output + hidden_states
+        if attn_output.ndim == 4:
+            attn_output = attn_output.squeeze(1)
 
         if hidden_states.ndim == 4:
-            hidden_states = hidden_states.squeeze(1)
+            hidden_states = torch.mean(hidden_states, dim=1, keepdim=False)
+       
+        hidden_states = attn_output + hidden_states
 
         # 1.2 GLIGEN Control
         if gligen_kwargs is not None:
