@@ -2403,7 +2403,7 @@ class UNet2DConditionModel(
                 aug_emb = self.get_aug_embed(
                     emb=emb, encoder_hidden_states=encoder_hidden_states[:,index,:,:], added_cond_kwargs=added_cond_kwargs
                 )
-            aug_emb_list.append(aug_emb)
+                aug_emb_list.append(aug_emb)
 
         if self.config.addition_embed_type == "image_hint":
             aug_emb, hint = aug_emb
@@ -2418,14 +2418,17 @@ class UNet2DConditionModel(
                 _emb = emb + _aug_emb if _aug_emb is not None else emb
                 emb_list.append(_emb)
 
+            emb_list = torch.stack(emb_list,dim=1)
+
         if self.time_embed_act is not None:
+            print(f'self.time_embed_act')
             # added to consider multiple encoder_hidden_states because of multiple text prompts
             if len(encoder_hidden_states.shape) == 3:
                 emb = self.time_embed_act(emb)
             else:
                 for _emb in emb_list:
                     _emb = self.time_embed_act(_emb)
-        emb_list = torch.stack(emb_list,dim=1)
+        
 
         # added to consider multiple encoder_hidden_states because of multiple text prompts
         if len(encoder_hidden_states.shape) == 3:
