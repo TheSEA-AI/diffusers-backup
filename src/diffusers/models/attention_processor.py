@@ -3455,10 +3455,9 @@ class AttnProcessor2_0(torch.nn.Module):
 
                 #print(f'AttnProcessor2_0 _hidden_states shape={_hidden_states.shape}')
                 #print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
-                if encoder_hidden_states is None:
-                    _encoder_hidden_states = _hidden_states
-                elif attn.norm_cross:
-                    _encoder_hidden_states = attn.norm_encoder_hidden_states(encoder_hidden_states[:,index,:,:])
+                _encoder_hidden_states = encoder_hidden_states[:,index,:,:]
+                if attn.norm_cross:
+                    _encoder_hidden_states = attn.norm_encoder_hidden_states(_encoder_hidden_states)
 
                 key = attn.to_k(_encoder_hidden_states)
                 value = attn.to_v(_encoder_hidden_states)
