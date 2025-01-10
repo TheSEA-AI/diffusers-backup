@@ -918,7 +918,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
         #   [batch,  heads, query_tokens, key_tokens] (e.g. torch sdp attn)
         #   [batch * heads, query_tokens, key_tokens] (e.g. xformers or classic attn)
         
-        #print(f'transformer 2d hidden_states shape 1 = {hidden_states.shape}')
+        print(f'transformer 2d hidden_states shape 1 = {hidden_states.shape}')
         if attention_mask is not None and attention_mask.ndim == 2:
             # assume that mask is expressed as:
             #   (1 = keep,      0 = discard)
@@ -948,7 +948,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
                 hidden_states_list = torch.stack(hidden_states_list,dim=1)
 
 
-            #print(f'transformer 2d hidden_states shape 2 = {hidden_states.shape}')
+            print(f'transformer 2d hidden_states shape 2 = {hidden_states.shape}')
         elif self.is_input_vectorized:
             hidden_states = self.latent_image_embedding(hidden_states)
             #print(f'transformer 2d hidden_states shape 3 = {hidden_states.shape}')

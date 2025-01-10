@@ -858,26 +858,29 @@ class BasicTransformerBlock(nn.Module):
                 else:
                     raise ValueError("Incorrect norm used")
                 norm_hidden_states_list.append(norm_hidden_states)
+            norm_hidden_states_list = torch.stack(norm_hidden_states_list, dim=1)
 
         #print(f'attention norm_hidden_states shape = {norm_hidden_states.shape}')
 
         if self.pos_embed is not None:
+            print(f'self.pos_embed is used')
             if len(hidden_states.shape) == 3:
                 norm_hidden_states = self.pos_embed(norm_hidden_states)
             else:
                 for _norm_hidden_states in norm_hidden_states_list:
                     _norm_hidden_states = self.pos_embed(_norm_hidden_states)
 
-                norm_hidden_states_list = torch.stack(norm_hidden_states_list, dim=1)
+                #norm_hidden_states_list = torch.stack(norm_hidden_states_list, dim=1)
 
         # 1. Prepare GLIGEN inputs
         cross_attention_kwargs = cross_attention_kwargs.copy() if cross_attention_kwargs is not None else {}
         gligen_kwargs = cross_attention_kwargs.pop("gligen", None)
 
-        #print(f'attention encoder_hidden_states = {encoder_hidden_states.shape}')
+        print(f'attention encoder_hidden_states = {encoder_hidden_states.shape}')
+        print(f'attention hidden_states.shape = {hidden_states.shape}')
         attn_output = self.attn1(
             norm_hidden_states if len(hidden_states.shape) == 3 else norm_hidden_states_list,
-            #encoder_hidden_states=encoder_hidden_states if self.only_cross_attention else None, #if len(encoder_hidden_states.shape) == 4 else None, 
+            encoder_hidden_states=None, #encoder_hidden_states if self.only_cross_attention else None, #if len(encoder_hidden_states.shape) == 4 else None, 
             attention_mask=attention_mask,
             **cross_attention_kwargs,
         )
