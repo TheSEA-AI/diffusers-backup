@@ -595,7 +595,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
     """
 
     _supports_gradient_checkpointing = True
-    _no_split_modules = ["CustomBasicTransformerBlock"]
+    _no_split_modules = ["BasicTransformerBlock"]
 
     @register_to_config
     def __init__(
@@ -712,7 +712,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
 
         self.transformer_blocks = nn.ModuleList(
             [
-                CustomBasicTransformerBlock(
+                BasicTransformerBlock(
                     self.inner_dim,
                     self.config.num_attention_heads,
                     self.config.attention_head_dim,
@@ -754,7 +754,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
 
         self.transformer_blocks = nn.ModuleList(
             [
-                CustomBasicTransformerBlock(
+                BasicTransformerBlock(
                     self.inner_dim,
                     self.config.num_attention_heads,
                     self.config.attention_head_dim,
@@ -801,7 +801,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
 
         self.transformer_blocks = nn.ModuleList(
             [
-                CustomBasicTransformerBlock(
+                BasicTransformerBlock(
                     self.inner_dim,
                     self.config.num_attention_heads,
                     self.config.attention_head_dim,
@@ -985,7 +985,8 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
                     **ckpt_kwargs,
                 )
             else:
-                #print(f'transformer 2d encoder_hidden_states = {encoder_hidden_states.shape}')
+                print(f'transformer 2d encoder_hidden_states = {encoder_hidden_states.shape}')
+                print(f'len_of_hidden_states={len_of_hidden_states}')
                 hidden_states = block(
                     hidden_states if len_of_hidden_states == 4 else hidden_states_list,
                     attention_mask=attention_mask,
