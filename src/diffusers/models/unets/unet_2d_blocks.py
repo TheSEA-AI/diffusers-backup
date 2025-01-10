@@ -3142,7 +3142,7 @@ class CrossAttnUpBlock2D(nn.Module):
                 else:
                     hidden_states_list = []
                     for index in range(temb.shape[1]):
-                        _hidden_states = resnet(hidden_states, temb[:,index,:,:])
+                        _hidden_states = resnet(hidden_states, temb[:,index,:])
                         hidden_states_list.append(_hidden_states)
                     hidden_states_list = torch.stack(hidden_states_list,dim=1)
                 hidden_states = attn(
