@@ -1037,7 +1037,16 @@ class UNetMidBlock2DCrossAttn(nn.Module):
             if cross_attention_kwargs.get("scale", None) is not None:
                 logger.warning("Passing `scale` to `cross_attention_kwargs` is deprecated. `scale` will be ignored.")
 
-        hidden_states = self.resnets[0](hidden_states, temb)
+        if len(temb.shape) == 2:
+            hidden_states = self.resnets[0](hidden_states, temb)
+        else:
+            hidden_states_list = []
+            for index in range(temb.shape[1]):
+                _hidden_states = self.resnets[0](hidden_states, temb[:,index,:,:])
+                hidden_states_list.append(_hidden_states)
+            hidden_states_list = torch.stack(hidden_states_list,dim=1)
+            hidden_states = torch.mean(hidden_states_list, dim=1, keepdim=False) 
+        
         for attn, resnet in zip(self.attentions, self.resnets[1:]):
             if torch.is_grad_enabled() and self.gradient_checkpointing:
 
@@ -1082,8 +1091,9 @@ class UNetMidBlock2DCrossAttn(nn.Module):
                         _hidden_states = resnet(hidden_states, temb[:,index,:,:])
                         hidden_states_list.append(_hidden_states)
                     hidden_states_list = torch.stack(hidden_states_list,dim=1)
+                    hidden_states = torch.mean(hidden_states_list, dim=1, keepdim=False)
 
-        return hidden_states if len(temb.shape) == 2 else hidden_states_list
+        return hidden_states 
 
 
 class UNetMidBlock2DSimpleCrossAttn(nn.Module):
