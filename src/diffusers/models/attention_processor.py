@@ -3337,7 +3337,7 @@ class AttnProcessor2_0(torch.nn.Module):
         print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
         if encoder_hidden_states is not None:
             print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
-        if hidden_states.ndim == 4:
+        if hidden_states.ndim == 4 and hidden_states.shape[1] <= 10:
             hidden_states_list = []
             residual = torch.mean(hidden_states, dim=1, keepdim=False) # modified to use the mean of hidden_states
             if not text_masks.shape[0] == hidden_states.shape[1]:
@@ -3522,8 +3522,6 @@ class AttnProcessor2_0(torch.nn.Module):
 
             query = attn.to_q(hidden_states)
 
-            #print(f'AttnProcessor2_0 hidden_states shape={hidden_states.shape}')
-            #print(f'AttnProcessor2_0 encoder_hidden_states shape={encoder_hidden_states.shape}')
             if encoder_hidden_states is None:
                 encoder_hidden_states = hidden_states
             elif attn.norm_cross:
