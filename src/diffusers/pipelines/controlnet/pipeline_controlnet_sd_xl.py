@@ -1576,7 +1576,6 @@ class StableDiffusionXLControlNetPipeline(
                         "time_ids": add_time_ids.chunk(2)[1],
                     }
                 else:
-                    print(f'prompt_embeds_list in ctln')
                     control_model_input = latent_model_input
                     controlnet_prompt_embeds = prompt_embeds_list if isinstance(prompt, list) else prompt_embeds #prompt_embeds, thesea modified
                     controlnet_added_cond_kwargs = added_cond_kwargs
@@ -1594,6 +1593,7 @@ class StableDiffusionXLControlNetPipeline(
                     t,
                     encoder_hidden_states=controlnet_prompt_embeds,
                     controlnet_cond=image,
+                    cross_attention_kwargs=self.cross_attention_kwargs,
                     conditioning_scale=cond_scale,
                     guess_mode=guess_mode,
                     added_cond_kwargs=controlnet_added_cond_kwargs,
