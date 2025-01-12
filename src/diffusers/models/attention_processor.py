@@ -3301,6 +3301,7 @@ class AttnProcessor2_0:
                 _hidden_states = _hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                 _hidden_states = _hidden_states.to(query.dtype)
                 
+                print(f'mask={text_masks[index,:,:,:]}')
                 mask_downsample = IPAdapterMaskProcessor.downsample(
                     text_masks[index,:,:,:],
                     batch_size,
@@ -5190,6 +5191,7 @@ class IPAdapterAttnProcessor2_0(torch.nn.Module):
                         )
                         _current_ip_hidden_states = _current_ip_hidden_states.to(query.dtype)
 
+                        print(f'mask={mask[:, i, :, :]}')
                         mask_downsample = IPAdapterMaskProcessor.downsample(
                             mask[:, i, :, :],
                             batch_size,
