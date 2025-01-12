@@ -988,7 +988,7 @@ class Transformer2DModel(LegacyModelMixin, LegacyConfigMixin):
                 print(f'transformer 2d encoder_hidden_states = {encoder_hidden_states.shape}')
                 print(f'len_of_hidden_states={len_of_hidden_states}')
                 hidden_states = block(
-                    hidden_states if len_of_hidden_states == 4 else hidden_states_list,
+                    hidden_states,# if len_of_hidden_states == 4 else hidden_states_list,
                     attention_mask=attention_mask,
                     encoder_hidden_states=encoder_hidden_states,
                     encoder_attention_mask=encoder_attention_mask,

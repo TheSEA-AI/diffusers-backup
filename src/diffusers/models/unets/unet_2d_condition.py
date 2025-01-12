@@ -2494,7 +2494,7 @@ class UNet2DConditionModel(
                 print(f'unet 2d condition emb_list shape = {emb_list.shape}')
                 sample, res_samples = downsample_block(
                     hidden_states=sample,
-                    temb=emb if len(encoder_hidden_states.shape) == 3 else emb_list,
+                    temb=emb,# if len(encoder_hidden_states.shape) == 3 else emb_list,
                     encoder_hidden_states=encoder_hidden_states,
                     attention_mask=attention_mask,
                     cross_attention_kwargs=cross_attention_kwargs,
@@ -2524,7 +2524,7 @@ class UNet2DConditionModel(
             if hasattr(self.mid_block, "has_cross_attention") and self.mid_block.has_cross_attention:
                 sample = self.mid_block(
                     sample,
-                    emb if len(encoder_hidden_states.shape) == 3 else emb_list,
+                    emb, # if len(encoder_hidden_states.shape) == 3 else emb_list,
                     encoder_hidden_states=encoder_hidden_states,
                     attention_mask=attention_mask,
                     cross_attention_kwargs=cross_attention_kwargs,
@@ -2559,7 +2559,7 @@ class UNet2DConditionModel(
             if hasattr(upsample_block, "has_cross_attention") and upsample_block.has_cross_attention:
                 sample = upsample_block(
                     hidden_states=sample,
-                    temb=emb if len(encoder_hidden_states.shape) == 3 else emb_list,
+                    temb=emb, # if len(encoder_hidden_states.shape) == 3 else emb_list,
                     res_hidden_states_tuple=res_samples,
                     encoder_hidden_states=encoder_hidden_states,
                     cross_attention_kwargs=cross_attention_kwargs,
