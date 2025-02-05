@@ -24,7 +24,7 @@ from huggingface_hub.utils import validate_hf_hub_args
 from torch import nn
 
 from ..models.embeddings import (
-    ImageProjectionCustomized,
+    ImageProjectionCustomized, # thesea modified for human element model
     ImageProjection,
     IPAdapterFaceIDImageProjection,
     IPAdapterFaceIDPlusImageProjection,
@@ -577,6 +577,7 @@ class UNet2DConditionLoadersMixin:
         image_projection = None
         init_context = init_empty_weights if low_cpu_mem_usage else nullcontext
 
+        # thesea modified for human element model
         if state_dict is None:
             # IP-Adapter-Customized
             num_image_text_embeds = 1 # fixed
@@ -589,6 +590,7 @@ class UNet2DConditionLoadersMixin:
                     image_embed_dim=clip_embeddings_dim,
                     num_image_text_embeds=num_image_text_embeds,
                 )
+        # thesea modified for human element model
         else:
             if "proj.weight" in state_dict:
                 # IP-Adapter
@@ -777,6 +779,7 @@ class UNet2DConditionLoadersMixin:
                         updated_state_dict[diffusers_name] = value
 
         if not low_cpu_mem_usage:
+            # thesea modified for human element model
             if state_dict is not None:
                 image_projection.load_state_dict(updated_state_dict, strict=True)
             else:
@@ -841,6 +844,7 @@ class UNet2DConditionLoadersMixin:
                     )
                 num_image_text_embeds = []
                 for state_dict in state_dicts:
+                    # thesea modified for human element model
                     if state_dict["image_proj"] is None:
                         num_image_text_embeds += [1]
                     else:   
@@ -905,6 +909,7 @@ class UNet2DConditionLoadersMixin:
 
         # convert IP-Adapter Image Projection layers to diffusers
         image_projection_layers = []
+
         for state_dict in state_dicts:
             image_projection_layer = self._convert_ip_adapter_image_proj_to_diffusers(
                 state_dict["image_proj"], low_cpu_mem_usage=low_cpu_mem_usage

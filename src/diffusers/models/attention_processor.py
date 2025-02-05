@@ -5238,6 +5238,7 @@ class IPAdapterAttnProcessor2_0(torch.nn.Module):
 
         return hidden_states
 
+
 class CustomIPAdapterAttnProcessor2_0(torch.nn.Module):
     r"""
     Custom Attention processor for Both Text and IP-Adapter Masks for PyTorch 2.0.
@@ -5481,6 +5482,7 @@ class CustomIPAdapterAttnProcessor2_0(torch.nn.Module):
         hidden_states = hidden_states / attn.rescale_output_factor
 
         return hidden_states
+
 
 
 class IPAdapterXFormersAttnProcessor(torch.nn.Module):
