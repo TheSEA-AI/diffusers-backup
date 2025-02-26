@@ -70,6 +70,7 @@ class SD3Transformer2DLoadersMixin:
         # thesea modified for color modality in multimodality model
         if "proj_in.weight" in state_dict["image_proj"]:
             embed_dim = state_dict["image_proj"]["proj_in.weight"].shape[1]
+            color_modality = False
         else:
             color_modality = True
             embed_dim = 0
