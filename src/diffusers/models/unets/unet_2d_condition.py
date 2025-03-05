@@ -1185,10 +1185,11 @@ class UNet2DConditionModel(
                     encoder_hidden_states=encoder_hidden_states[:,index,:,:], added_cond_kwargs=added_cond_kwargs
                 )   
 
-            if self.encoder_hid_proj is not None and self.config.encoder_hid_dim_type == "ip_image_proj":
-                image_embeds = added_cond_kwargs.get("image_embeds")
-                image_embeds = self.encoder_hid_proj(image_embeds)
-                encoder_hidden_states = (encoder_hidden_states, image_embeds)
+        # thesea modified for text prompt mask 
+        if self.encoder_hid_proj is not None and self.config.encoder_hid_dim_type == "ip_image_proj":
+            image_embeds = added_cond_kwargs.get("image_embeds")
+            image_embeds = self.encoder_hid_proj(image_embeds)
+            encoder_hidden_states = (encoder_hidden_states, image_embeds)
 
         # 2. pre-process
         sample = self.conv_in(sample)
