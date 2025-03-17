@@ -5716,6 +5716,7 @@ class SD3IPAdapterJointAttnProcessor2_0(torch.nn.Module):
         ip_hidden_states: torch.FloatTensor = None,
         temb: torch.FloatTensor = None,
         text_masks: Optional[torch.Tensor] = None, # thesea modification for text prompt mask
+        ip_adapter_masks: Optional[torch.Tensor] = None, # thesea modification for ip mask
     ) -> torch.FloatTensor:
         """
         Perform the attention computation, integrating image features (if provided) and timestep embeddings.
@@ -5869,34 +5870,58 @@ class SD3IPAdapterJointAttnProcessor2_0(torch.nn.Module):
                         tmp_encoder_hidden_states = attn.to_add_out(context_states_list[index])
                         encoder_hidden_states_list.append(tmp_encoder_hidden_states)
                     encoder_hidden_states = torch.stack(encoder_hidden_states_list, dim=1)
-                    
+
+        if ip_adapter_masks is not None:
+            print(f'ip_hidden_states shape={ip_hidden_states.shape}')
+            if not (len(ip_adapter_masks) == len(ip_hidden_states)):
+                raise ValueError(
+                    f"Length of ip_adapter_masks array ({len(ip_adapter_masks)}) must match "
+                    f"number of ip_hidden_states "
+                    f"({len(ip_hidden_states)})"
+                )
+        else:
+            ip_adapter_masks = [None] * len(ip_hidden_states)
+
+        # thesea modification for ip mask
         # IP Adapter
         if self.scale != 0 and ip_hidden_states is not None:
-            # Norm image features
-            norm_ip_hidden_states = self.norm_ip(ip_hidden_states, temb=temb)
+            for tmp_ip_hidden_states, mask in zip(ip_hidden_states, ip_adapter_masks):
+                # Norm image features
+                _norm_ip_hidden_states = self.norm_ip(tmp_ip_hidden_states, temb=temb)
 
-            # To k and v
-            ip_key = self.to_k_ip(norm_ip_hidden_states)
-            ip_value = self.to_v_ip(norm_ip_hidden_states)
+                # To k and v
+                _ip_key = self.to_k_ip(_norm_ip_hidden_states)
+                _ip_value = self.to_v_ip(_norm_ip_hidden_states)
 
-            # Reshape
-            ip_key = ip_key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-            ip_value = ip_value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
+                # Reshape
+                _ip_key = _ip_key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
+                _ip_value = _ip_value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
 
-            # Norm
-            query = self.norm_q(img_query)
-            img_key = self.norm_k(img_key)
-            ip_key = self.norm_ip_k(ip_key)
+                # Norm
+                _query = self.norm_q(img_query)
+                _img_key = self.norm_k(img_key)
+                _ip_key = self.norm_ip_k(_ip_key)
 
-            # cat img
-            key = torch.cat([img_key, ip_key], dim=2)
-            value = torch.cat([img_value, ip_value], dim=2)
+                # cat img
+                _key = torch.cat([_img_key, _ip_key], dim=2)
+                _value = torch.cat([img_value, _ip_value], dim=2)
 
-            ip_hidden_states = F.scaled_dot_product_attention(query, key, value, dropout_p=0.0, is_causal=False)
-            ip_hidden_states = ip_hidden_states.transpose(1, 2).view(batch_size, -1, attn.heads * head_dim)
-            ip_hidden_states = ip_hidden_states.to(query.dtype)
+                _ip_hidden_states = F.scaled_dot_product_attention(_query, _key, _value, dropout_p=0.0, is_causal=False)
+                _ip_hidden_states = _ip_hidden_states.transpose(1, 2).view(batch_size, -1, attn.heads * head_dim)
+                _ip_hidden_states = _ip_hidden_states.to(_query.dtype)
 
-            hidden_states = hidden_states + ip_hidden_states * self.scale
+                if mask is not None:
+                    mask_downsample = IPAdapterMaskProcessor.downsample(
+                        mask,
+                        batch_size,
+                        _ip_hidden_states.shape[1],
+                        _ip_hidden_states.shape[2],
+                    )
+                    
+                    mask_downsample = mask_downsample.to(dtype=_query.dtype, device=_query.device)
+                    _ip_hidden_states = _ip_hidden_states * mask_downsample
+                    
+                hidden_states = hidden_states + _ip_hidden_states * self.scale
 
         # linear proj
         hidden_states = attn.to_out[0](hidden_states)
