@@ -2362,16 +2362,13 @@ class FluxAttnProcessor2_0:
         txt_mask: Optional[torch.Tensor] = None, # thesea modification for ip mask
         prod_masks: Optional[torch.Tensor] = None, # thesea modification for text mask
     ) -> torch.FloatTensor:
-        if prod_masks is None:
-            batch_size, _, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states.shape
-        else:
-            if encoder_hidden_states is not None:
-                if encoder_hidden_states.ndim == 4:
-                    batch_size, _, _ = encoder_hidden_states[:,0,:,:].shape
-                else:
-                    batch_size, _, _ = encoder_hidden_states.shape
+        if encoder_hidden_states is not None:
+            if encoder_hidden_states.ndim == 4:
+                batch_size, _, _ = encoder_hidden_states[:,0,:,:].shape
             else:
-                batch_size, _, _ = hidden_states.shape
+                batch_size, _, _ = encoder_hidden_states.shape
+        else:
+            batch_size, _, _ = hidden_states.shape
 
         # `sample` projections.
         query = attn.to_q(hidden_states)
@@ -2439,8 +2436,8 @@ class FluxAttnProcessor2_0:
                 img_query = torch.cat([img_encoder_hidden_states_query_proj, query], dim=2)
                 img_key = torch.cat([img_encoder_hidden_states_key_proj, key], dim=2)
                 img_value = torch.cat([img_encoder_hidden_states_value_proj, value], dim=2)
-            elif prod_masks is not None:
-                print(f'prod_masks shape={prod_masks.shape}, encoder_hidden_states shape={encoder_hidden_states.shape}')
+            elif encoder_hidden_states.ndim == 4:#prod_masks is not None:
+                #print(f'prod_masks shape={prod_masks.shape}, encoder_hidden_states shape={encoder_hidden_states.shape}')
                 if not prod_masks.shape[0] == encoder_hidden_states.shape[1]:
                     raise ValueError(
                         f"Length of text masks ({prod_masks.shape[0]}) must match "
@@ -2562,7 +2559,7 @@ class FluxAttnProcessor2_0:
                 masked_img_hidden_states = img_hidden_states[:,729:,:] * img_mask_downsample
                 
                 hidden_states = torch.cat([txt_hidden_states[:,:-hidden_states.shape[1],:], img_hidden_states[:,:-hidden_states.shape[1],:], masked_txt_hidden_states + masked_img_hidden_states],dim=1)
-            elif prod_masks is not None:
+            elif encoder_hidden_states.ndim == 4:#prod_masks is not None:
                 hidden_states_list = []
                 encoder_hidden_states_list = []
                 for tmp_mask, tmp_query, tmp_key, tmp_value in zip(prod_masks, queries, keys, values):
