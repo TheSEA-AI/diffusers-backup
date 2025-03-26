@@ -2365,8 +2365,14 @@ class FluxAttnProcessor2_0:
         if prod_masks is None:
             batch_size, _, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states.shape
         else:
-            batch_size, _, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states[:,0,:,:].shape
-        
+            if encoder_hidden_states is not None:
+                if encoder_hidden_states.ndim == 4:
+                    batch_size, _, _ = encoder_hidden_states[:,0,:,:].shape
+                else:
+                    batch_size, _, _ = encoder_hidden_states.shape
+            else:
+                batch_size, _, _ = hidden_states.shape
+
         # `sample` projections.
         query = attn.to_q(hidden_states)
         key = attn.to_k(hidden_states)
@@ -2434,6 +2440,7 @@ class FluxAttnProcessor2_0:
                 img_key = torch.cat([img_encoder_hidden_states_key_proj, key], dim=2)
                 img_value = torch.cat([img_encoder_hidden_states_value_proj, value], dim=2)
             elif prod_masks is not None:
+                print(f'prod_masks shape={prod_masks.shape}, encoder_hidden_states shape={encoder_hidden_states.shape}')
                 if not prod_masks.shape[0] == encoder_hidden_states.shape[1]:
                     raise ValueError(
                         f"Length of text masks ({prod_masks.shape[0]}) must match "
@@ -2593,7 +2600,8 @@ class FluxAttnProcessor2_0:
             hidden_states = hidden_states.to(query.dtype)
 
         if encoder_hidden_states is not None:
-            if prod_masks is None:
+            # thesea modified for text prompt mask
+            if encoder_hidden_states.ndim == 3:
                 encoder_hidden_states, hidden_states = (
                     hidden_states[:, : encoder_hidden_states.shape[1]],
                     hidden_states[:, encoder_hidden_states.shape[1] :],
@@ -2604,7 +2612,7 @@ class FluxAttnProcessor2_0:
             # dropout
             hidden_states = attn.to_out[1](hidden_states)
 
-            if prod_masks is None:
+            if encoder_hidden_states.ndim == 3:
                 encoder_hidden_states = attn.to_add_out(encoder_hidden_states)
             else:
                 for index in range(encoder_hidden_states.shape[1]):
