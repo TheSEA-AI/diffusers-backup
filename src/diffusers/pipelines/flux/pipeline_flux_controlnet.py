@@ -901,6 +901,7 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
                 lora_scale=lora_scale,
             )
         if do_true_cfg:
+            print(f'do_true_cfg')
             (
                 negative_prompt_embeds,
                 negative_pooled_prompt_embeds,

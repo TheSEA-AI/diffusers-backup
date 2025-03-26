@@ -296,7 +296,15 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
             if guidance is None
             else self.time_text_embed(timestep, guidance, pooled_projections)
         )
-        encoder_hidden_states = self.context_embedder(encoder_hidden_states)
+        # thesea modifed for text prompt mask
+        if len(encoder_hidden_states.shape) == 3:
+            encoder_hidden_states = self.context_embedder(encoder_hidden_states)
+        else:
+            encoder_hidden_states_list = []
+            for index in range(encoder_hidden_states.shape[1]):
+                tmp_encoder_hidden_states = self.context_embedder(encoder_hidden_states[:,index,:,:])
+                encoder_hidden_states_list.append(tmp_encoder_hidden_states)
+            encoder_hidden_states = torch.stack(encoder_hidden_states_list, dim=1)
 
         if self.union:
             # union mode
@@ -344,7 +352,10 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                 )
             block_samples = block_samples + (hidden_states,)
 
-        hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
+        if len(encoder_hidden_states.shape) == 3:
+            hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
+        elif len(encoder_hidden_states.shape) == 4:
+            hidden_states = torch.cat([encoder_hidden_states[:,-1,:,:], hidden_states], dim=1)
 
         single_block_samples = ()
         for index_block, block in enumerate(self.single_transformer_blocks):
@@ -362,7 +373,10 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                     temb=temb,
                     image_rotary_emb=image_rotary_emb,
                 )
-            single_block_samples = single_block_samples + (hidden_states[:, encoder_hidden_states.shape[1] :],)
+            if len(encoder_hidden_states.shape) == 3:    
+                single_block_samples = single_block_samples + (hidden_states[:, encoder_hidden_states.shape[1] :],)
+            elif len(encoder_hidden_states.shape) == 4:
+                single_block_samples = single_block_samples + (hidden_states[:, encoder_hidden_states.shape[2] :],)
 
         # controlnet block
         controlnet_block_samples = ()

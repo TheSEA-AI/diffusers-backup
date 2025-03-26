@@ -143,9 +143,20 @@ class FluxTransformerBlock(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         norm_hidden_states, gate_msa, shift_mlp, scale_mlp, gate_mlp = self.norm1(hidden_states, emb=temb)
 
-        norm_encoder_hidden_states, c_gate_msa, c_shift_mlp, c_scale_mlp, c_gate_mlp = self.norm1_context(
-            encoder_hidden_states, emb=temb
-        )
+        # thesea modifed for text prompt mask
+        if len(encoder_hidden_states.shape) == 3:
+            norm_encoder_hidden_states, c_gate_msa, c_shift_mlp, c_scale_mlp, c_gate_mlp = self.norm1_context(
+                encoder_hidden_states, emb=temb
+            )
+        else:
+            norm_encoder_hidden_states = []
+            for index in range(encoder_hidden_states.shape[1]):
+                tmp_norm_encoder_hidden_states, c_gate_msa, c_shift_mlp, c_scale_mlp, c_gate_mlp = self.norm1_context(
+                    encoder_hidden_states[:,index,:,:], emb=temb
+                )
+                norm_encoder_hidden_states.append(tmp_norm_encoder_hidden_states)
+            norm_encoder_hidden_states = torch.stack(norm_encoder_hidden_states, dim=1)
+
         joint_attention_kwargs = joint_attention_kwargs or {}
         # Attention.
         attention_outputs = self.attn(
@@ -175,15 +186,43 @@ class FluxTransformerBlock(nn.Module):
             hidden_states = hidden_states + ip_attn_output
 
         # Process attention outputs for the `encoder_hidden_states`.
-
-        context_attn_output = c_gate_msa.unsqueeze(1) * context_attn_output
+        if len(encoder_hidden_states.shape) == 3:
+            context_attn_output = c_gate_msa.unsqueeze(1) * context_attn_output
+        elif len(encoder_hidden_states.shape) == 4:
+            for index in range(encoder_hidden_states.shape[1]):
+                context_attn_output[:,index,:,:] = c_gate_msa.unsqueeze(1) * context_attn_output[:,index,:,:]
+        
         encoder_hidden_states = encoder_hidden_states + context_attn_output
 
-        norm_encoder_hidden_states = self.norm2_context(encoder_hidden_states)
-        norm_encoder_hidden_states = norm_encoder_hidden_states * (1 + c_scale_mlp[:, None]) + c_shift_mlp[:, None]
+        # thesea modified for text prompt mask
+        if len(encoder_hidden_states.shape) == 3:
+            norm_encoder_hidden_states = self.norm2_context(encoder_hidden_states)
+            norm_encoder_hidden_states = norm_encoder_hidden_states * (1 + c_scale_mlp[:, None]) + c_shift_mlp[:, None]
+        elif len(encoder_hidden_states.shape) == 4:
+            norm_encoder_hidden_states = []
+            for index in range(encoder_hidden_states.shape[1]):
+                tmp_norm_encoder_hidden_states = self.norm2_context(encoder_hidden_states[:,index,:,:])
+                tmp_norm_encoder_hidden_states = tmp_norm_encoder_hidden_states * (1 + c_scale_mlp[:, None]) + c_shift_mlp[:, None]
+                norm_encoder_hidden_states.append(tmp_norm_encoder_hidden_states)
+            norm_encoder_hidden_states = torch.stack(norm_encoder_hidden_states, dim=1)
+        
+        # thesea modified for text prompt mask
+        if len(encoder_hidden_states.shape) == 3:
+            context_ff_output = self.ff_context(norm_encoder_hidden_states)
+        elif len(encoder_hidden_states.shape) == 4:
+            context_ff_output = []
+            for index in range(encoder_hidden_states.shape[1]):
+                tmp_context_ff_output = self.ff_context(norm_encoder_hidden_states[:,index,:,:])
+                context_ff_output.append(tmp_context_ff_output)
+            context_ff_output = torch.stack(context_ff_output, dim=1)
+        
+        # thesea modified for text prompt mask
+        if len(encoder_hidden_states.shape) == 3:
+            encoder_hidden_states = encoder_hidden_states + c_gate_mlp.unsqueeze(1) * context_ff_output
+        elif len(encoder_hidden_states.shape) == 4:
+            for index in range(encoder_hidden_states.shape[1]):
+                encoder_hidden_states[:,index,:,:] = encoder_hidden_states[:,index,:,:] + c_gate_mlp.unsqueeze(1) * context_ff_output[:,index,:,:]
 
-        context_ff_output = self.ff_context(norm_encoder_hidden_states)
-        encoder_hidden_states = encoder_hidden_states + c_gate_mlp.unsqueeze(1) * context_ff_output
         if encoder_hidden_states.dtype == torch.float16:
             encoder_hidden_states = encoder_hidden_states.clip(-65504, 65504)
 
@@ -455,12 +494,16 @@ class FluxTransformer2DModel(
             if guidance is None
             else self.time_text_embed(timestep, guidance, pooled_projections)
         )
-        #print(f'transformer flux encoder_hidden_states.ndim={encoder_hidden_states.ndim}')
-        if encoder_hidden_states.ndim == 4:
-            for index in range(encoder_hidden_states.ndim):
-                encoder_hidden_states[:,index,:,:] = self.context_embedder(encoder_hidden_states[:,index,:,:])
-        else:
+
+        # thesea modifed for text prompt mask
+        if len(encoder_hidden_states.shape) == 3:
             encoder_hidden_states = self.context_embedder(encoder_hidden_states)
+        else:
+            encoder_hidden_states_list = []
+            for index in range(encoder_hidden_states.shape[1]):
+                tmp_encoder_hidden_states = self.context_embedder(encoder_hidden_states[:,index,:,:])
+                encoder_hidden_states_list.append(tmp_encoder_hidden_states)
+            encoder_hidden_states = torch.stack(encoder_hidden_states_list, dim=1)
 
         if txt_ids.ndim == 3:
             logger.warning(
@@ -513,7 +556,12 @@ class FluxTransformer2DModel(
                     )
                 else:
                     hidden_states = hidden_states + controlnet_block_samples[index_block // interval_control]
-        hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
+
+        # thesea modifed for text prompt mask
+        if len(encoder_hidden_states.shape) == 3:
+            hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
+        elif len(encoder_hidden_states.shape) == 4:
+            hidden_states = torch.cat([encoder_hidden_states[:,-1,:,:], hidden_states], dim=1)
 
         for index_block, block in enumerate(self.single_transformer_blocks):
             if torch.is_grad_enabled() and self.gradient_checkpointing:
@@ -536,12 +584,24 @@ class FluxTransformer2DModel(
             if controlnet_single_block_samples is not None:
                 interval_control = len(self.single_transformer_blocks) / len(controlnet_single_block_samples)
                 interval_control = int(np.ceil(interval_control))
-                hidden_states[:, encoder_hidden_states.shape[1] :, ...] = (
-                    hidden_states[:, encoder_hidden_states.shape[1] :, ...]
-                    + controlnet_single_block_samples[index_block // interval_control]
-                )
 
-        hidden_states = hidden_states[:, encoder_hidden_states.shape[1] :, ...]
+                # thesea modifed for text prompt mask
+                if len(encoder_hidden_states.shape) == 3:
+                    hidden_states[:, encoder_hidden_states.shape[1] :, ...] = (
+                        hidden_states[:, encoder_hidden_states.shape[1] :, ...]
+                        + controlnet_single_block_samples[index_block // interval_control]
+                    )
+                elif len(encoder_hidden_states.shape) == 4:
+                    hidden_states[:, encoder_hidden_states.shape[2] :, ...] = (
+                        hidden_states[:, encoder_hidden_states.shape[2] :, ...]
+                        + controlnet_single_block_samples[index_block // interval_control]
+                    )
+
+        # thesea modifed for text prompt mask
+        if len(encoder_hidden_states.shape) == 3:
+            hidden_states = hidden_states[:, encoder_hidden_states.shape[1] :, ...]
+        elif len(encoder_hidden_states.shape) == 4:
+            hidden_states = hidden_states[:, encoder_hidden_states.shape[2] :, ...]
 
         hidden_states = self.norm_out(hidden_states, temb)
         output = self.proj_out(hidden_states)
