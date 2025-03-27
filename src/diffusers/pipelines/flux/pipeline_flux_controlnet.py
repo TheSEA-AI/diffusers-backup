@@ -1109,8 +1109,8 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
                     conditioning_scale=cond_scale,
                     timestep=timestep / 1000,
                     guidance=guidance,
-                    pooled_projections=pooled_prompt_embeds, # TBD: pooled_prompt_embeds_list if isinstance(prompt, list) else pooled_prompt_embeds,
-                    encoder_hidden_states=prompt_embeds, #prompt_embeds, thesea modified for text prompt mask
+                    pooled_projections=pooled_prompt_embeds, 
+                    encoder_hidden_states=prompt_embeds,
                     txt_ids=text_ids,
                     img_ids=latent_image_ids,
                     joint_attention_kwargs=self.joint_attention_kwargs,
@@ -1126,8 +1126,8 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
                     hidden_states=latents,
                     timestep=timestep / 1000,
                     guidance=guidance,
-                    pooled_projections=pooled_prompt_embeds, # TBD: pooled_prompt_embeds_list if isinstance(prompt, list) else pooled_prompt_embeds,
-                    encoder_hidden_states=prompt_embeds, #prompt_embeds, thesea modified for text prompt mask
+                    pooled_projections=pooled_prompt_embeds, 
+                    encoder_hidden_states=prompt_embeds, 
                     controlnet_block_samples=controlnet_block_samples,
                     controlnet_single_block_samples=controlnet_single_block_samples,
                     txt_ids=text_ids,
