@@ -2473,12 +2473,14 @@ class FluxAttnProcessor2_0:
                     tmp_hidden_states = tmp_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                     tmp_hidden_states = tmp_hidden_states.to(query.dtype)
 
+                    print(f'hidden_states shape={hidden_states}')
                     mask_downsample = IPAdapterMaskProcessor.downsample(
                         tmp_mask,
                         batch_size,
                         hidden_states.shape[1],
                         hidden_states.shape[2],
-                    )   
+                    ) 
+                    print(f'mask_downsample shape={mask_downsample}, unique values={torch.unique(mask_downsample)}')  
                     mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
                     hidden_states_list.append(tmp_hidden_states[:,512:,:] * mask_downsample) 
                     encoder_hidden_states_list.append(tmp_hidden_states[:,:512,:])
