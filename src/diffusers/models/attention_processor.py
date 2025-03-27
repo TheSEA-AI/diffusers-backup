@@ -2503,8 +2503,8 @@ class FluxAttnProcessor2_0:
                 if img_mask is not None:
                     cos, sin = image_rotary_emb
                     print(f'cos shape={cos.shape}')
-                    txt_query = apply_rotary_emb(txt_query, (torch.cat([cos[0:512,:], cos[1024:,:]], dim = 0), torch.cat([sin[0:512,:], sin[1024:,:]],dim=0))) 
-                    txt_key = apply_rotary_emb(txt_key,     (torch.cat([cos[0:512,:], cos[1024:,:]], dim = 0), torch.cat([sin[0:512,:], sin[1024:,:]],dim=0))) 
+                    txt_query = apply_rotary_emb(txt_query, (torch.cat([cos[0:512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[0:512,:], sin[-4096:,:]],dim=0))) 
+                    txt_key = apply_rotary_emb(txt_key,     (torch.cat([cos[0:512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[0:512,:], sin[-4096:,:]],dim=0))) 
 
                     img_query = apply_rotary_emb(img_query, (cos[512:,:],sin[512:,:])) 
                     img_key = apply_rotary_emb(img_key,     (cos[512:,:],sin[512:,:]))
@@ -2512,8 +2512,8 @@ class FluxAttnProcessor2_0:
                     cos, sin = image_rotary_emb
                     print(f'cos shape={cos.shape}')
                     for index in range(len(queries)):
-                        queries[index] = apply_rotary_emb(queries[index], (torch.cat([cos[index*512:(index+1)*512,:], cos[len(queries)*512:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[len(queries)*512:,:]], dim = 0)))
-                        keys[index] = apply_rotary_emb(keys[index],       (torch.cat([cos[index*512:(index+1)*512,:], cos[len(queries)*512:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[len(queries)*512:,:]], dim = 0)))
+                        queries[index] = apply_rotary_emb(queries[index], (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
+                        keys[index] = apply_rotary_emb(keys[index],       (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
                     # for index, (tmp_query, tmp_key) in enumerate(zip(queries, keys)):
                     #     print(f'index={index}')
                     #     tmp_query = apply_rotary_emb(tmp_query, (torch.cat([cos[index*512:(index+1)*512,:], cos[len(queries)*512:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[len(queries)*512:,:]], dim = 0)))
