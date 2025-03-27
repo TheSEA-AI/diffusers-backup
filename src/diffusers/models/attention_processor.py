@@ -2450,10 +2450,10 @@ class FluxAttnProcessor2_0:
             # theseam modified
             if encoder_hidden_states is not None:
                 if prod_masks is not None:
-                    cos, sin = image_rotary_emb
+                    cos, sin = image_rotary_emb# [embeds_dim (512) + 4096, 128]
                     for index, (tmp_query, tmp_key) in enumerate(zip(queries, keys)):
-                        tmp_query = apply_rotary_emb(tmp_query,(cos[-4608:], sin[-4608:]))  #(torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
-                        tmp_key = apply_rotary_emb(tmp_key, (cos[-4608:], sin[-4608:]))  #(torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
+                        tmp_query = apply_rotary_emb(tmp_query, (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
+                        tmp_key = apply_rotary_emb(tmp_key, (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
                 else:
                     query = apply_rotary_emb(query, image_rotary_emb)
                     key = apply_rotary_emb(key, image_rotary_emb)
