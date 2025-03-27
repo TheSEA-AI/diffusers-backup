@@ -914,7 +914,6 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
                 lora_scale=lora_scale,
             )
 
-        print(f'text_ids={text_ids}')
         # 3. Prepare control image
         num_channels_latents = self.transformer.config.in_channels // 4
         if isinstance(self.controlnet, FluxControlNetModel):
