@@ -2610,6 +2610,7 @@ class FluxAttnProcessor2_0:
             
             return hidden_states, encoder_hidden_states
         else:
+            print(f'attention processor hidden_states shape={hidden_states}')
             return hidden_states
 
 
