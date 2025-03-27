@@ -2537,6 +2537,7 @@ class FluxAttnProcessor2_0:
                 img_hidden_states = img_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                 img_hidden_states = img_hidden_states.to(query.dtype)
 
+                print(f'txt_mask shape={txt_mask.shape}')
                 txt_mask_downsample = IPAdapterMaskProcessor.downsample(
                     txt_mask[0],
                     batch_size,
@@ -2560,6 +2561,7 @@ class FluxAttnProcessor2_0:
             elif prod_masks is not None:
                 hidden_states_list = []
                 encoder_hidden_states_list = []
+                print(f'prod_masks shape={prod_masks.shape}')
                 for tmp_mask, tmp_query, tmp_key, tmp_value in zip(prod_masks, queries, keys, values):
                     tmp_hidden_states = F.scaled_dot_product_attention(
                         tmp_query, tmp_key, tmp_value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
@@ -2567,6 +2569,7 @@ class FluxAttnProcessor2_0:
                     tmp_hidden_states = tmp_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                     tmp_hidden_states = tmp_hidden_states.to(query.dtype)
 
+                    print(f'tmp_mask shape={tmp_mask.shape}')
                     mask_downsample = IPAdapterMaskProcessor.downsample(
                         tmp_mask,
                         batch_size,
