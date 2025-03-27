@@ -2503,8 +2503,8 @@ class FluxAttnProcessor2_0:
                 if img_mask is not None:
                     cos, sin = image_rotary_emb
                     #print(f'cos shape={cos.shape}, sin shape={sin.shape}')
-                    txt_query = apply_rotary_emb(txt_query, (torch.cat([cos[0:512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[0:512,:], sin[-4096:,:]],dim=0))) 
-                    txt_key = apply_rotary_emb(txt_key,     (torch.cat([cos[0:512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[0:512,:], sin[-4096:,:]],dim=0))) 
+                    txt_query = apply_rotary_emb(txt_query, (torch.cat([cos[0:512,:], cos[1241:,:]], dim = 0), torch.cat([sin[0:512,:], sin[1241:,:]],dim=0))) 
+                    txt_key = apply_rotary_emb(txt_key,     (torch.cat([cos[0:512,:], cos[1241:,:]], dim = 0), torch.cat([sin[0:512,:], sin[1241:,:]],dim=0))) 
 
                     img_query = apply_rotary_emb(img_query, (cos[512:,:],sin[512:,:])) 
                     img_key = apply_rotary_emb(img_key,     (cos[512:,:],sin[512:,:]))
@@ -2552,7 +2552,7 @@ class FluxAttnProcessor2_0:
                 )
 
                 img_mask_downsample = img_mask_downsample.to(dtype=query.dtype, device=query.device)
-                masked_img_hidden_states = img_hidden_states[:,-4096:,:] * img_mask_downsample
+                masked_img_hidden_states = img_hidden_states[:,729:,:] * img_mask_downsample
                 
                 hidden_states = torch.cat([txt_hidden_states[:,:-hidden_states.shape[1],:], img_hidden_states[:,:-hidden_states.shape[1],:], masked_txt_hidden_states + masked_img_hidden_states],dim=1)
             elif prod_masks is not None:
