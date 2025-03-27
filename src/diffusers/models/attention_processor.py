@@ -2509,8 +2509,8 @@ class FluxAttnProcessor2_0:
                 elif prod_masks is not None:
                     cos, sin = image_rotary_emb
                     for index, (tmp_query, tmp_key) in enumerate(zip(queries, keys)):
-                        tmp_query = apply_rotary_emb(tmp_query, (cos[index*512:(index+1)*512,:], sin[index*512:(index+1)*512,:]))
-                        tmp_key = apply_rotary_emb(tmp_key, (cos[index*512:(index+1)*512,:], sin[index*512:(index+1)*512,:]))
+                        tmp_query = apply_rotary_emb(tmp_query, (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
+                        tmp_key = apply_rotary_emb(tmp_key, (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
                 else:
                     query = apply_rotary_emb(query, image_rotary_emb)
                     key = apply_rotary_emb(key, image_rotary_emb)
