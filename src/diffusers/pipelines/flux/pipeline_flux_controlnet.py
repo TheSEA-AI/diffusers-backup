@@ -882,7 +882,7 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
                 prompt_embeds_list.append(prompt_embeds)
                 text_ids_list.append(text_ids)
             prompt_embeds = torch.cat(prompt_embeds_list, dim=1)
-            text_ids = torch.cat(text_ids_list, dim=0)
+            #text_ids = torch.cat(text_ids_list, dim=0)
         else:
             (
                 prompt_embeds,
