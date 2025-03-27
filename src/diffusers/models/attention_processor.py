@@ -2383,7 +2383,6 @@ class FluxAttnProcessor2_0:
 
         # the attention in FluxSingleTransformerBlock does not use `encoder_hidden_states`
         if encoder_hidden_states is not None:
-            print(f'encoder_hidden_states shape={encoder_hidden_states.shape}')
             # theseam modified
             if img_mask is not None:
                 # `context` projections.
