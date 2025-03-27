@@ -2440,7 +2440,7 @@ class FluxAttnProcessor2_0:
                 queries = []
                 keys = []
                 values = []
-                for index in range(encoder_hidden_states.shape[1]/512):
+                for index in range(int(encoder_hidden_states.shape[1]/512)):
                     encoder_hidden_states_query_proj = attn.add_q_proj(encoder_hidden_states[:,index*512:(index+1)*512,:])
                     encoder_hidden_states_key_proj = attn.add_k_proj(encoder_hidden_states[:,index*512:(index+1)*512,:])
                     encoder_hidden_states_value_proj = attn.add_v_proj(encoder_hidden_states[:,index*512:(index+1)*512,:])
