@@ -2362,11 +2362,11 @@ class FluxAttnProcessor2_0:
         txt_mask: Optional[torch.Tensor] = None, # thesea modification for ip mask
         prod_masks: Optional[torch.Tensor] = None, # thesea modification for text mask
     ) -> torch.FloatTensor:
-        if prod_masks is None:
-            batch_size, _, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states.shape
+        if encoder_hidden_states is None:
+            batch_size = hidden_states.shape[0]
         else:
-            batch_size, _, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states[:,0,:,:].shape
-        
+            batch_size = encoder_hidden_states.shape[0]
+           
         # `sample` projections.
         query = attn.to_q(hidden_states)
         key = attn.to_k(hidden_states)
@@ -2434,18 +2434,18 @@ class FluxAttnProcessor2_0:
                 img_key = torch.cat([img_encoder_hidden_states_key_proj, key], dim=2)
                 img_value = torch.cat([img_encoder_hidden_states_value_proj, value], dim=2)
             elif prod_masks is not None:
-                if not prod_masks.shape[0] == encoder_hidden_states.shape[1]:
+                if not prod_masks.shape[0] == int(encoder_hidden_states.shape[1]/512):
                     raise ValueError(
                         f"Length of text masks ({prod_masks.shape[0]}) must match "
                         f"the number of text prompts "
-                        f"({encoder_hidden_states.shape[1]})")
+                        f"({int(encoder_hidden_states.shape[1]/512)})")
                 queries = []
                 keys = []
                 values = []
-                for index in range(encoder_hidden_states.shape[1]):
-                    encoder_hidden_states_query_proj = attn.add_q_proj(encoder_hidden_states[:,index,:,:])
-                    encoder_hidden_states_key_proj = attn.add_k_proj(encoder_hidden_states[:,index,:,:])
-                    encoder_hidden_states_value_proj = attn.add_v_proj(encoder_hidden_states[:,index,:,:])
+                for index in range(int(encoder_hidden_states.shape[1]/512)):
+                    encoder_hidden_states_query_proj = attn.add_q_proj(encoder_hidden_states[:,index*512:(index+1)*512,:,:])
+                    encoder_hidden_states_key_proj = attn.add_k_proj(encoder_hidden_states[:,index*512:(index+1)*512,:,:])
+                    encoder_hidden_states_value_proj = attn.add_v_proj(encoder_hidden_states[:,index*512:(index+1)*512,:,:])
 
                     encoder_hidden_states_query_proj = encoder_hidden_states_query_proj.view(
                         batch_size, -1, attn.heads, head_dim
@@ -2502,16 +2502,17 @@ class FluxAttnProcessor2_0:
             if encoder_hidden_states is not None:
                 if img_mask is not None:
                     cos, sin = image_rotary_emb
-                    print(f'cos shape={cos.shape}, cos[1241:,:] shape={cos[1241:,:].shape}, cos[-4096:,:] shape={cos[-4096:,:].shape}')
                     txt_query = apply_rotary_emb(txt_query, (torch.cat([cos[0:512,:], cos[1241:,:]], dim = 0), torch.cat([sin[0:512,:], sin[1241:,:]],dim=0))) 
                     txt_key = apply_rotary_emb(txt_key,     (torch.cat([cos[0:512,:], cos[1241:,:]], dim = 0), torch.cat([sin[0:512,:], sin[1241:,:]],dim=0))) 
 
                     img_query = apply_rotary_emb(img_query, (cos[512:,:],sin[512:,:])) 
                     img_key = apply_rotary_emb(img_key,     (cos[512:,:],sin[512:,:]))
                 elif prod_masks is not None:
-                    for tmp_query, tmp_key in zip(queries, keys):
-                        tmp_query = apply_rotary_emb(tmp_query, image_rotary_emb)
-                        tmp_key = apply_rotary_emb(tmp_key, image_rotary_emb)
+                    cos, sin = image_rotary_emb
+                    print(f'cos shape={cos.shape}')
+                    for index, (tmp_query, tmp_key) in enumerate(zip(queries, keys)):
+                        tmp_query = apply_rotary_emb(tmp_query, (torch.cat([cos[index*512:(index+1)*512,:], cos[len(queries)*512:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[len(queries)*512:,:]], dim = 0)))
+                        tmp_key = apply_rotary_emb(tmp_key,     (torch.cat([cos[index*512:(index+1)*512,:], cos[len(queries)*512:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[len(queries)*512:,:]], dim = 0)))
                 else:
                     query = apply_rotary_emb(query, image_rotary_emb)
                     key = apply_rotary_emb(key, image_rotary_emb)
@@ -2579,6 +2580,7 @@ class FluxAttnProcessor2_0:
                 hidden_states = torch.sum(hidden_states_list, dim=0, keepdim=False)
                 
                 encoder_hidden_states = torch.stack(encoder_hidden_states_list, dim=1)
+                hidden_states = torch.cat([encoder_hidden_states, hidden_states],dim=1)
             else:
                 hidden_states = F.scaled_dot_product_attention(
                     query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
@@ -2593,23 +2595,18 @@ class FluxAttnProcessor2_0:
             hidden_states = hidden_states.to(query.dtype)
 
         if encoder_hidden_states is not None:
-            if prod_masks is None:
-                encoder_hidden_states, hidden_states = (
-                    hidden_states[:, : encoder_hidden_states.shape[1]],
-                    hidden_states[:, encoder_hidden_states.shape[1] :],
-                )
+            encoder_hidden_states, hidden_states = (
+                hidden_states[:, : encoder_hidden_states.shape[1]],
+                hidden_states[:, encoder_hidden_states.shape[1] :],
+            )
 
             # linear proj
             hidden_states = attn.to_out[0](hidden_states)
             # dropout
             hidden_states = attn.to_out[1](hidden_states)
 
-            if prod_masks is None:
-                encoder_hidden_states = attn.to_add_out(encoder_hidden_states)
-            else:
-                for index in range(encoder_hidden_states.shape[1]):
-                    encoder_hidden_states[:,index,:,:] = attn.to_add_out(encoder_hidden_states[:,index,:,:])
-
+            encoder_hidden_states = attn.to_add_out(encoder_hidden_states)
+            
             return hidden_states, encoder_hidden_states
         else:
             return hidden_states
