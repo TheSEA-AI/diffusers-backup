@@ -862,6 +862,7 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
         do_true_cfg = true_cfg_scale > 1 and negative_prompt is not None
         ## thesea modified for text prompt mask
         prompt_embeds_list = []
+        text_ids_list = []
         if isinstance(prompt, list):
             for pmt in prompt:
                 (
@@ -879,7 +880,9 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
                     lora_scale=lora_scale,
                 )
                 prompt_embeds_list.append(prompt_embeds)
+                text_ids_list.append(text_ids)
             prompt_embeds = torch.cat(prompt_embeds_list, dim=1)
+            text_ids = torch.cat(text_ids_list, dim=1)
         else:
             (
                 prompt_embeds,
