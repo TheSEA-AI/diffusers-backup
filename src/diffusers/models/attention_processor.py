@@ -2379,6 +2379,8 @@ class FluxAttnProcessor2_0:
         key = key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
         value = value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
 
+        print(f'hidden states query shape={query.shape}, key shape={key.shape}, value shape={value.shape}')
+
         if attn.norm_q is not None:
             query = attn.norm_q(query)
         if attn.norm_k is not None:
