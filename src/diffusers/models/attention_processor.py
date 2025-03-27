@@ -2452,8 +2452,8 @@ class FluxAttnProcessor2_0:
                 if prod_masks is not None:
                     cos, sin = image_rotary_emb
                     for index, (tmp_query, tmp_key) in enumerate(zip(queries, keys)):
-                        tmp_query = apply_rotary_emb(tmp_query, (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
-                        tmp_key = apply_rotary_emb(tmp_key, (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
+                        tmp_query = apply_rotary_emb(tmp_query,(cos[-4608:], sin[-4608:]))  #(torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
+                        tmp_key = apply_rotary_emb(tmp_key, (cos[-4608:], sin[-4608:]))  #(torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
                 else:
                     query = apply_rotary_emb(query, image_rotary_emb)
                     key = apply_rotary_emb(key, image_rotary_emb)
@@ -2480,11 +2480,11 @@ class FluxAttnProcessor2_0:
                         hidden_states.shape[2],
                     ) 
                     mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
-                    hidden_states_list.append(tmp_hidden_states[:,512:,:]) # * mask_downsample 
+                    hidden_states_list.append(tmp_hidden_states[:,512:,:] * mask_downsample ) 
                     encoder_hidden_states_list.append(tmp_hidden_states[:,:512,:])
                 
                 hidden_states_list = torch.stack(hidden_states_list)
-                hidden_states = torch.mean(hidden_states_list, dim=0, keepdim=False)
+                hidden_states = torch.sum(hidden_states_list, dim=0, keepdim=False)
                 
                 encoder_hidden_states = torch.cat(encoder_hidden_states_list, dim=1)
                 hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
