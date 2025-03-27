@@ -513,6 +513,7 @@ class FluxTransformer2DModel(
         
         print(f'transformer_flux before single block encoder_hidden_states shape={encoder_hidden_states.shape}')
         hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
+        print(f'transformer_flux before single block hidden_states shape={hidden_states.shape}')
 
         for index_block, block in enumerate(self.single_transformer_blocks):
             if torch.is_grad_enabled() and self.gradient_checkpointing:

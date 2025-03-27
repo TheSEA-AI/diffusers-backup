@@ -347,6 +347,7 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
 
         print(f'controlnet_flux before single block encoder_hidden_states shape={encoder_hidden_states.shape}')
         hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
+        print(f'controlnet_flux before single block hidden_states shape={hidden_states.shape}')
 
         single_block_samples = ()
         for index_block, block in enumerate(self.single_transformer_blocks):
