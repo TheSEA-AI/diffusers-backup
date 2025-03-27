@@ -2502,7 +2502,6 @@ class FluxAttnProcessor2_0:
             if encoder_hidden_states is not None:
                 if img_mask is not None:
                     cos, sin = image_rotary_emb
-                    print(f'cos shape={cos.shape}')
                     txt_query = apply_rotary_emb(txt_query, (torch.cat([cos[0:512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[0:512,:], sin[-4096:,:]],dim=0))) 
                     txt_key = apply_rotary_emb(txt_key,     (torch.cat([cos[0:512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[0:512,:], sin[-4096:,:]],dim=0))) 
 
@@ -2510,14 +2509,9 @@ class FluxAttnProcessor2_0:
                     img_key = apply_rotary_emb(img_key,     (cos[512:,:],sin[512:,:]))
                 elif prod_masks is not None:
                     cos, sin = image_rotary_emb
-                    print(f'cos shape={cos.shape}')
                     for index in range(len(queries)):
                         queries[index] = apply_rotary_emb(queries[index], (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
                         keys[index] = apply_rotary_emb(keys[index],       (torch.cat([cos[index*512:(index+1)*512,:], cos[-4096:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[-4096:,:]], dim = 0)))
-                    # for index, (tmp_query, tmp_key) in enumerate(zip(queries, keys)):
-                    #     print(f'index={index}')
-                    #     tmp_query = apply_rotary_emb(tmp_query, (torch.cat([cos[index*512:(index+1)*512,:], cos[len(queries)*512:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[len(queries)*512:,:]], dim = 0)))
-                    #     tmp_key = apply_rotary_emb(tmp_key,     (torch.cat([cos[index*512:(index+1)*512,:], cos[len(queries)*512:,:]], dim = 0), torch.cat([sin[index*512:(index+1)*512,:], sin[len(queries)*512:,:]], dim = 0)))
                 else:
                     query = apply_rotary_emb(query, image_rotary_emb)
                     key = apply_rotary_emb(key, image_rotary_emb)
@@ -2541,7 +2535,6 @@ class FluxAttnProcessor2_0:
                 img_hidden_states = img_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                 img_hidden_states = img_hidden_states.to(query.dtype)
 
-                print(f'txt_mask shape={txt_mask.shape}')
                 txt_mask_downsample = IPAdapterMaskProcessor.downsample(
                     txt_mask[0],
                     batch_size,
@@ -2565,7 +2558,6 @@ class FluxAttnProcessor2_0:
             elif prod_masks is not None:
                 hidden_states_list = []
                 encoder_hidden_states_list = []
-                print(f'prod_masks shape={prod_masks.shape}')
                 for tmp_mask, tmp_query, tmp_key, tmp_value in zip(prod_masks, queries, keys, values):
                     tmp_hidden_states = F.scaled_dot_product_attention(
                         tmp_query, tmp_key, tmp_value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
@@ -2573,7 +2565,6 @@ class FluxAttnProcessor2_0:
                     tmp_hidden_states = tmp_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                     tmp_hidden_states = tmp_hidden_states.to(query.dtype)
 
-                    print(f'tmp_mask shape={tmp_mask.shape}')
                     mask_downsample = IPAdapterMaskProcessor.downsample(
                         tmp_mask,
                         batch_size,
