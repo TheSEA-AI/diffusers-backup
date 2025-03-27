@@ -2595,9 +2595,9 @@ class FluxAttnProcessor2_0:
                     encoder_hidden_states_list = []
                     for index in range(int((hidden_states.shape[1] - 4096) / 512)):
                         tmp_hidden_states = F.scaled_dot_product_attention(
-                            torch.cat([query[:,:, index*512:(index+1)*512,:], query[:,:,-4096:,:]],dim=1), 
-                            torch.cat([key[:,:, index*512:(index+1)*512,:], key[:,:,-4096:,:]],dim=1), 
-                            torch.cat([value[:,:, index*512:(index+1)*512,:], value[:,:,-4096:,:]],dim=1), 
+                            torch.cat([query[:,:, index*512:(index+1)*512,:], query[:,:,-4096:,:]],dim=2), 
+                            torch.cat([key[:,:, index*512:(index+1)*512,:], key[:,:,-4096:,:]],dim=2), 
+                            torch.cat([value[:,:, index*512:(index+1)*512,:], value[:,:,-4096:,:]],dim=2), 
                             attn_mask=attention_mask, 
                             dropout_p=0.0, 
                             is_causal=False
