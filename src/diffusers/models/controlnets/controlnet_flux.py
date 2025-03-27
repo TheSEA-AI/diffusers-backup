@@ -344,7 +344,6 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                 )
             block_samples = block_samples + (hidden_states,)
 
-        #encoder_hidden_states = encoder_hidden_states[:,:512,:]
         hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
 
         single_block_samples = ()

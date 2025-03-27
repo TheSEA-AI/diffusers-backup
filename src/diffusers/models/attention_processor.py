@@ -2494,6 +2494,8 @@ class FluxAttnProcessor2_0:
                 query = torch.cat([encoder_hidden_states_query_proj, query], dim=2)
                 key = torch.cat([encoder_hidden_states_key_proj, key], dim=2)
                 value = torch.cat([encoder_hidden_states_value_proj, value], dim=2)
+        else:
+            print(f'hidden_states shape={hidden_states.shape}')
 
         if image_rotary_emb is not None:
             from .embeddings import apply_rotary_emb
