@@ -2495,7 +2495,7 @@ class FluxAttnProcessor2_0:
                 key = torch.cat([encoder_hidden_states_key_proj, key], dim=2)
                 value = torch.cat([encoder_hidden_states_value_proj, value], dim=2)
         else:
-            print(f'hidden_states shape={hidden_states.shape}')
+            print(f'attention processor input hidden_states shape={hidden_states.shape}')
 
         if image_rotary_emb is not None:
             from .embeddings import apply_rotary_emb
@@ -2610,7 +2610,7 @@ class FluxAttnProcessor2_0:
             
             return hidden_states, encoder_hidden_states
         else:
-            print(f'attention processor hidden_states shape={hidden_states.shape}')
+            print(f'attention processor return hidden_states shape={hidden_states.shape}')
             return hidden_states
 
 
