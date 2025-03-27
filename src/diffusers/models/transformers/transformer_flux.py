@@ -470,12 +470,10 @@ class FluxTransformer2DModel(
             )
             img_ids = img_ids[0]
 
-        print(f'txt_ids shape={txt_ids.shape}, img_ids shape={img_ids.shape}')
         ids = torch.cat((txt_ids, img_ids), dim=0)
         image_rotary_emb = self.pos_embed(ids)
         cos, sin = image_rotary_emb
-        print(f'image_rotary_emb cos shape={cos.shape}, sin shape={cos.shape}')
-
+        
         if joint_attention_kwargs is not None and "ip_adapter_image_embeds" in joint_attention_kwargs:
             ip_adapter_image_embeds = joint_attention_kwargs.pop("ip_adapter_image_embeds")
             ip_hidden_states = self.encoder_hid_proj(ip_adapter_image_embeds)
