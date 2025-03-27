@@ -542,16 +542,22 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
 
         # scale & concatenate image and text embeddings
         prompt_embeds = torch.cat([prompt_embeds, image_embeds], dim=1)
+
+        print(f'prompt_embeds_scale={prompt_embeds_scale}')
+        print(f'prompt_embeds shape={prompt_embeds.shape}, prompt_embeds={prompt_embeds}')
         
         prompt_embeds *= torch.tensor(prompt_embeds_scale, device=device, dtype=image_embeds.dtype)[:, None, None]
         pooled_prompt_embeds *= torch.tensor(pooled_prompt_embeds_scale, device=device, dtype=image_embeds.dtype)[
             :, None
         ]
 
+        print(f'prompt_embeds before sum shape={prompt_embeds.shape}, prompt_embeds={prompt_embeds}')
+
         # weighted sum
         prompt_embeds = torch.sum(prompt_embeds, dim=0, keepdim=True)
         pooled_prompt_embeds = torch.sum(pooled_prompt_embeds, dim=0, keepdim=True)
 
+        print(f'prompt_embeds after sum shape={prompt_embeds.shape}, prompt_embeds={prompt_embeds}')
         # Offload all models
         self.maybe_free_model_hooks()
 
