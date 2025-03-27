@@ -2381,7 +2381,7 @@ class FluxAttnProcessor2_0:
 
         # the attention in FluxSingleTransformerBlock does not use `encoder_hidden_states`
         if encoder_hidden_states is not None:
-            # theseam modified
+            # thesea modified
             if prod_masks is not None:
                 if not prod_masks.shape[0] == int(encoder_hidden_states.shape[1] / 512):
                     raise ValueError(
