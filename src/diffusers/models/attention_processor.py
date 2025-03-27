@@ -2480,11 +2480,11 @@ class FluxAttnProcessor2_0:
                         hidden_states.shape[2],
                     ) 
                     mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
-                    hidden_states_list.append(tmp_hidden_states[:,512:,:] * mask_downsample) 
+                    hidden_states_list.append(tmp_hidden_states[:,512:,:]) # * mask_downsample 
                     encoder_hidden_states_list.append(tmp_hidden_states[:,:512,:])
                 
                 hidden_states_list = torch.stack(hidden_states_list)
-                hidden_states = torch.sum(hidden_states_list, dim=0, keepdim=False)
+                hidden_states = torch.mean(hidden_states_list, dim=0, keepdim=False)
                 
                 encoder_hidden_states = torch.cat(encoder_hidden_states_list, dim=1)
                 hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
