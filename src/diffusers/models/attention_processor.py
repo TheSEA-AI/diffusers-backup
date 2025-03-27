@@ -2589,11 +2589,49 @@ class FluxAttnProcessor2_0:
                 hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                 hidden_states = hidden_states.to(query.dtype)
         else:
-            hidden_states = F.scaled_dot_product_attention(
-                query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
-            )
-            hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
-            hidden_states = hidden_states.to(query.dtype)
+            if (hidden_states.shape[1] - 4096) > 512:
+                if (hidden_states.shape[1] - 4096) % 512 == 0:
+                    hidden_states_list = []
+                    encoder_hidden_states_list = []
+                    for index in range(int((hidden_states.shape[1] - 4096) / 512)):
+                        tmp_hidden_states = F.scaled_dot_product_attention(
+                            torch.cat([query[:,index*512:(index+1)*512,:], query[:,-4096:,:]],dim=1), 
+                            torch.cat([key[:,index*512:(index+1)*512,:], key[:,-4096:,:]],dim=1), 
+                            torch.cat([value[:,index*512:(index+1)*512,:], value[:,-4096:,:]],dim=1), 
+                            attn_mask=attention_mask, 
+                            dropout_p=0.0, 
+                            is_causal=False
+                        )
+                        tmp_hidden_states = tmp_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
+                        tmp_hidden_states = tmp_hidden_states.to(query.dtype)
+
+                        mask_downsample = IPAdapterMaskProcessor.downsample(
+                            prod_masks[index],
+                            batch_size,
+                            4096,
+                            hidden_states.shape[2],
+                        )   
+                        mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
+                        hidden_states_list.append(tmp_hidden_states[:,512:,:] * mask_downsample) 
+                        encoder_hidden_states_list.append(tmp_hidden_states[:,:512,:])
+                    
+                    hidden_states_list = torch.stack(hidden_states_list)
+                    hidden_states = torch.sum(hidden_states_list, dim=0, keepdim=False)
+                    
+                    encoder_hidden_states = torch.cat(encoder_hidden_states_list, dim=1)
+                    hidden_states = torch.cat([encoder_hidden_states, hidden_states],dim=1)
+                else:
+                    hidden_states = F.scaled_dot_product_attention(
+                        query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
+                    )
+                    hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
+                    hidden_states = hidden_states.to(query.dtype)
+            else:
+                hidden_states = F.scaled_dot_product_attention(
+                    query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
+                )
+                hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
+                hidden_states = hidden_states.to(query.dtype)
 
         if encoder_hidden_states is not None:
             encoder_hidden_states, hidden_states = (
