@@ -2379,8 +2379,6 @@ class FluxAttnProcessor2_0:
         key = key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
         value = value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
 
-        print(f'hidden states query shape={query.shape}, key shape={key.shape}, value shape={value.shape}')
-
         if attn.norm_q is not None:
             query = attn.norm_q(query)
         if attn.norm_k is not None:
@@ -2597,9 +2595,9 @@ class FluxAttnProcessor2_0:
                     encoder_hidden_states_list = []
                     for index in range(int((hidden_states.shape[1] - 4096) / 512)):
                         tmp_hidden_states = F.scaled_dot_product_attention(
-                            torch.cat([query[:,index*512:(index+1)*512,:], query[:,-4096:,:]],dim=1), 
-                            torch.cat([key[:,index*512:(index+1)*512,:], key[:,-4096:,:]],dim=1), 
-                            torch.cat([value[:,index*512:(index+1)*512,:], value[:,-4096:,:]],dim=1), 
+                            torch.cat([query[:,:, index*512:(index+1)*512,:], query[:,:,-4096:,:]],dim=1), 
+                            torch.cat([key[:,:, index*512:(index+1)*512,:], key[:,:,-4096:,:]],dim=1), 
+                            torch.cat([value[:,:, index*512:(index+1)*512,:], value[:,:,-4096:,:]],dim=1), 
                             attn_mask=attention_mask, 
                             dropout_p=0.0, 
                             is_causal=False
