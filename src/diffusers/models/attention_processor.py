@@ -2431,7 +2431,7 @@ class FluxAttnProcessor2_0:
                 img_key = torch.cat([img_encoder_hidden_states_key_proj, key], dim=2)
                 img_value = torch.cat([img_encoder_hidden_states_value_proj, value], dim=2)
             elif prod_masks is not None:
-                if not prod_masks.shape[0] == (encoder_hidden_states.shape[1] / 512):
+                if not prod_masks.shape[0] == int(encoder_hidden_states.shape[1] / 512):
                     raise ValueError(
                         f"Length of text masks ({prod_masks.shape[0]}) must match "
                         f"the number of text prompts "
