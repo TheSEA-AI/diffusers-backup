@@ -2513,9 +2513,9 @@ class FluxAttnProcessor2_0:
                     img_query = apply_rotary_emb(img_query, (cos[512:,:],sin[512:,:])) 
                     img_key = apply_rotary_emb(img_key,     (cos[512:,:],sin[512:,:]))
                 elif encoder_hidden_states.ndim == 4:#prod_masks is not None:
-                    for tmp_query, tmp_key in zip(queries, keys):
-                        tmp_query = apply_rotary_emb(tmp_query, image_rotary_emb)
-                        tmp_key = apply_rotary_emb(tmp_key, image_rotary_emb)
+                    for index in range(len(queries)):
+                        queries[index] = apply_rotary_emb(queries[index], image_rotary_emb)
+                        keys[index] = apply_rotary_emb(keys[index], image_rotary_emb)
                 else:
                     query = apply_rotary_emb(query, image_rotary_emb)
                     key = apply_rotary_emb(key, image_rotary_emb)

@@ -372,6 +372,7 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                     hidden_states=hidden_states,
                     temb=temb,
                     image_rotary_emb=image_rotary_emb,
+                    joint_attention_kwargs=joint_attention_kwargs,
                 )
             if len(encoder_hidden_states.shape) == 3:    
                 single_block_samples = single_block_samples + (hidden_states[:, encoder_hidden_states.shape[1] :],)
