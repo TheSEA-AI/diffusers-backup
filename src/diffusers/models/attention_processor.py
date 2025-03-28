@@ -2617,7 +2617,7 @@ class FluxAttnProcessor2_0:
                         mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
 
                         mask_downsample_i2t = IPAdapterMaskProcessor.downsample(
-                            tmp_mask,
+                            prod_masks[index],
                             1,
                             hidden_states.shape[1],
                             512,
