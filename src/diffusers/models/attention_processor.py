@@ -2362,6 +2362,7 @@ class FluxAttnProcessor2_0:
         txt_mask: Optional[torch.Tensor] = None, # thesea modification for ip mask
         prod_masks: Optional[torch.Tensor] = None, # thesea modification for text mask
     ) -> torch.FloatTensor:
+        # thesea modification for text mask
         if encoder_hidden_states is None:
             batch_size = hidden_states.shape[0]
         else:
@@ -2587,14 +2588,15 @@ class FluxAttnProcessor2_0:
                 hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                 hidden_states = hidden_states.to(query.dtype)
         else:
-            if (hidden_states.shape[1] - 4096) > 512:
+            if ((hidden_states.shape[1] - 4096) > 512) and (prod_masks is not None):
                 if (hidden_states.shape[1] - 4096) % 512 == 0:
+                    print(f'mask applied to single block')
                     hidden_states_list = []
                     encoder_hidden_states_list = []
                     for index in range(int((hidden_states.shape[1] - 4096) / 512)):
                         tmp_hidden_states = F.scaled_dot_product_attention(
                             torch.cat([query[:,:, index*512:(index+1)*512,:], query[:,:,-4096:,:]],dim=2), 
-                            torch.cat([key[:,:, index*512:(index+1)*512,:], key[:,:,-4096:,:]],dim=2), 
+                            torch.cat([key  [:,:, index*512:(index+1)*512,:], key[:,:,-4096:,:]],dim=2), 
                             torch.cat([value[:,:, index*512:(index+1)*512,:], value[:,:,-4096:,:]],dim=2), 
                             attn_mask=attention_mask, 
                             dropout_p=0.0, 
