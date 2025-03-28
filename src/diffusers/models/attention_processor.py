@@ -2434,7 +2434,7 @@ class FluxAttnProcessor2_0:
             zero_index = attention_mask == 0.0
             one_index = attention_mask == 1
             neg_inf_bf16 = torch.tensor(float('-inf'), dtype=torch.bfloat16)
-            attention_mask = attention_mask.masked_fill(zero_indexk, neg_inf_bf16)
+            attention_mask = attention_mask.masked_fill(zero_index, neg_inf_bf16)
             attention_mask = attention_mask.masked_fill(one_index, 0.0)
 
         hidden_states = F.scaled_dot_product_attention(
