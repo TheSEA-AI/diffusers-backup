@@ -2590,7 +2590,6 @@ class FluxAttnProcessor2_0:
         else:
             if ((hidden_states.shape[1] - 4096) > 512) and (prod_masks is not None):
                 if (hidden_states.shape[1] - 4096) % 512 == 0:
-                    print(f'mask applied to single block')
                     hidden_states_list = []
                     encoder_hidden_states_list = []
                     for index in range(int((hidden_states.shape[1] - 4096) / 512)):
