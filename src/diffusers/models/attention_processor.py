@@ -2620,7 +2620,7 @@ class FluxAttnProcessor2_0:
                     hidden_states_list = torch.sum(hidden_states_list, dim=0, keepdim=False)
                     
                     encoder_hidden_states_list = torch.cat(encoder_hidden_states_list, dim=1)
-                    hidden_states_list = torch.cat([encoder_hidden_states_list, hidden_states_list],dim=1)
+                    hidden_states = torch.cat([encoder_hidden_states_list, hidden_states_list],dim=1)
                     #hidden_states[:,-4608:,:] = hidden_states_list[:,-4608:,:]
                     #print(f'hidden_states[:,-4608:,:] shape={hidden_states[:,-4608:,:].shape}')
                 else:
