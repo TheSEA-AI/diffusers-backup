@@ -2419,13 +2419,13 @@ class FluxAttnProcessor2_0:
                 mask_downsample_t2i = IPAdapterMaskProcessor.downsample(
                     prod_masks[index],
                     1,
-                    512,
                     4096,
+                    1,
                 )  
                 mask_downsample_t2i = mask_downsample_t2i.squeeze()
                 mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
-                attention_mask[index*512:(index+1)*512,-4096:] = mask_downsample_t2i
-                attention_mask[-4096:, index*512:(index+1)*512] = mask_downsample_t2i.transpose(0, 1)
+                attention_mask[index*512:(index+1)*512,-4096:] += mask_downsample_t2i
+                attention_mask[-4096:, index*512:(index+1)*512] = attention_mask[index*512:(index+1)*512,-4096:].transpose(0, 1)
                 
             attention_mask[-4096:,-4096:] = torch.ones(4096, 4096, dtype=query.dtype, device=query.device)
 
