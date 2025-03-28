@@ -2560,6 +2560,7 @@ class FluxAttnProcessor2_0:
                 hidden_states_list = []
                 encoder_hidden_states_list = []
                 for tmp_mask, tmp_query, tmp_key, tmp_value in zip(prod_masks, queries, keys, values):
+                    print(f'tmp_query.size(-2)={tmp_query.size(-2)}, tmp_key.size(-2)={tmp_key.size(-2)}')
                     tmp_hidden_states = F.scaled_dot_product_attention(
                         tmp_query, tmp_key, tmp_value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
                     )
@@ -2579,16 +2580,6 @@ class FluxAttnProcessor2_0:
                 hidden_states_list = torch.stack(hidden_states_list)
                 hidden_states = torch.sum(hidden_states_list, dim=0, keepdim=False)
                 
-                for index in range(len(encoder_hidden_states_list)):
-                    mask_downsample = IPAdapterMaskProcessor.downsample(
-                        prod_masks[index],
-                        batch_size,
-                        encoder_hidden_states_list[index].shape[1],
-                        encoder_hidden_states_list[index].shape[2],
-                    )
-                    mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
-                    encoder_hidden_states_list[index] = encoder_hidden_states_list[index] * mask_downsample
-
                 encoder_hidden_states = torch.cat(encoder_hidden_states_list, dim=1)
                 hidden_states = torch.cat([encoder_hidden_states, hidden_states],dim=1)
             else:
@@ -2626,17 +2617,7 @@ class FluxAttnProcessor2_0:
                     
                     hidden_states_list = torch.stack(hidden_states_list)
                     hidden_states = torch.sum(hidden_states_list, dim=0, keepdim=False)
-                    
-                    for index in range(len(encoder_hidden_states_list)):
-                        mask_downsample = IPAdapterMaskProcessor.downsample(
-                            prod_masks[index],
-                            batch_size,
-                            encoder_hidden_states_list[index].shape[1],
-                            encoder_hidden_states_list[index].shape[2],
-                        )
-                        mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
-                        encoder_hidden_states_list[index] = encoder_hidden_states_list[index] * mask_downsample
-                        
+                           
                     encoder_hidden_states_list = torch.cat(encoder_hidden_states_list, dim=1)
                     hidden_states = torch.cat([encoder_hidden_states_list, hidden_states],dim=1)
                 else:
