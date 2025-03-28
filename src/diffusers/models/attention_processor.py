@@ -2432,7 +2432,7 @@ class FluxAttnProcessor2_0:
                 attention_mask[index*512:(index+1)*512,-4096:] = mask_downsample_t2i_tensor
                 attention_mask[-4096:, index*512:(index+1)*512] = mask_downsample_t2i_tensor_transpose
 
-                img_size_masks = mask_downsample_t2i_tensor[:, :1].repeat(1, 4096)
+                img_size_masks = mask_downsample_t2i_tensor_transpose[:, :1].repeat(1, 4096)
                 img_size_masks_transpose = img_size_masks.transpose(-1, -2)
                 self_attend_masks = torch.logical_or(self_attend_masks, 
                                                         torch.logical_and(img_size_masks, img_size_masks_transpose))
