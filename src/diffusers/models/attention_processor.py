@@ -2565,7 +2565,7 @@ class FluxAttnProcessor2_0:
                         tmp_mask,
                         1,
                         512,
-                        hidden_states.shape[1],
+                        hidden_states.shape[2],
                     )   
                     mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
 
@@ -2612,7 +2612,7 @@ class FluxAttnProcessor2_0:
                             prod_masks[index],
                             1,
                             512,
-                            hidden_states.shape[1],
+                            hidden_states.shape[2],
                         )   
                         mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
 
