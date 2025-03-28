@@ -2560,21 +2560,32 @@ class FluxAttnProcessor2_0:
                 hidden_states_list = []
                 encoder_hidden_states_list = []
                 for tmp_mask, tmp_query, tmp_key, tmp_value in zip(prod_masks, queries, keys, values):
-                    print(f'tmp_query.size(-2)={tmp_query.size(-2)}, tmp_key.size(-2)={tmp_key.size(-2)}')
+                    attention_mask = torch.ones(tmp_query.size(-2), tmp_key.size(-2), dtype=query.dtype, device=query.device)
+                    mask_downsample_t2i = IPAdapterMaskProcessor.downsample(
+                        tmp_mask,
+                        1,
+                        512,
+                        hidden_states.shape[2],
+                    )   
+                    mask_downsample_t2i = mask_downsample.to(dtype=query.dtype, device=query.device)
+
+                    mask_downsample_i2t = IPAdapterMaskProcessor.downsample(
+                        tmp_mask,
+                        1,
+                        hidden_states.shape[1],
+                        512,
+                    )   
+                    mask_downsample_i2t = mask_downsample.to(dtype=query.dtype, device=query.device)
+                    attention_mask[:512,512:] = mask_downsample_t2i[0,:,:]
+                    attention_mask[512:,:512] = mask_downsample_i2t[0,:,:]
+                    
                     tmp_hidden_states = F.scaled_dot_product_attention(
                         tmp_query, tmp_key, tmp_value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
                     )
                     tmp_hidden_states = tmp_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                     tmp_hidden_states = tmp_hidden_states.to(query.dtype)
 
-                    mask_downsample = IPAdapterMaskProcessor.downsample(
-                        tmp_mask,
-                        batch_size,
-                        hidden_states.shape[1],
-                        hidden_states.shape[2],
-                    )   
-                    mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
-                    hidden_states_list.append(tmp_hidden_states[:,512:,:] * mask_downsample) 
+                    hidden_states_list.append(tmp_hidden_states[:,512:,:]) 
                     encoder_hidden_states_list.append(tmp_hidden_states[:,:512,:])
                 
                 hidden_states_list = torch.stack(hidden_states_list)
@@ -2594,6 +2605,27 @@ class FluxAttnProcessor2_0:
                     hidden_states_list = []
                     encoder_hidden_states_list = []
                     for index in range(int((hidden_states.shape[1] - 4096) / 512)):
+                        attention_mask = torch.ones(torch.cat([query[:,:, index*512:(index+1)*512,:], query[:,:,-4096:,:]],dim=2).size(-2),
+                                                    torch.cat([key  [:,:, index*512:(index+1)*512,:],   key[:,:,-4096:,:]],dim=2).size(-2), 
+                                                    dtype=query.dtype, device=query.device)
+                        mask_downsample_t2i = IPAdapterMaskProcessor.downsample(
+                            prod_masks[index],
+                            1,
+                            512,
+                            hidden_states.shape[2],
+                        )   
+                        mask_downsample_t2i = mask_downsample.to(dtype=query.dtype, device=query.device)
+
+                        mask_downsample_i2t = IPAdapterMaskProcessor.downsample(
+                            tmp_mask,
+                            1,
+                            hidden_states.shape[1],
+                            512,
+                        )   
+                        mask_downsample_i2t = mask_downsample.to(dtype=query.dtype, device=query.device)
+                        attention_mask[:512,512:] = mask_downsample_t2i[0,:,:]
+                        attention_mask[512:,:512] = mask_downsample_i2t[0,:,:]
+                        
                         tmp_hidden_states = F.scaled_dot_product_attention(
                             torch.cat([query[:,:, index*512:(index+1)*512,:], query[:,:,-4096:,:]],dim=2), 
                             torch.cat([key  [:,:, index*512:(index+1)*512,:], key[:,:,-4096:,:]],dim=2), 
@@ -2605,14 +2637,7 @@ class FluxAttnProcessor2_0:
                         tmp_hidden_states = tmp_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                         tmp_hidden_states = tmp_hidden_states.to(query.dtype)
 
-                        mask_downsample = IPAdapterMaskProcessor.downsample(
-                            prod_masks[index],
-                            batch_size,
-                            4096,
-                            hidden_states.shape[2],
-                        )   
-                        mask_downsample = mask_downsample.to(dtype=query.dtype, device=query.device)
-                        hidden_states_list.append(tmp_hidden_states[:,512:,:] * mask_downsample) 
+                        hidden_states_list.append(tmp_hidden_states[:,512:,:]) 
                         encoder_hidden_states_list.append(tmp_hidden_states[:,:512,:])
                     
                     hidden_states_list = torch.stack(hidden_states_list)
