@@ -2616,11 +2616,11 @@ class FluxAttnProcessor2_0:
                         encoder_hidden_states_list.append(tmp_hidden_states[:,:512,:])
                     
                     hidden_states_list = torch.stack(hidden_states_list)
-                    hidden_states = torch.sum(hidden_states_list, dim=0, keepdim=False)
+                    hidden_states_list = torch.sum(hidden_states_list, dim=0, keepdim=False)
                     
                     encoder_hidden_states_list = torch.cat(encoder_hidden_states_list, dim=1)
-                    hidden_states = torch.cat([encoder_hidden_states_list, hidden_states],dim=1)
-                    hidden_states[:,:-4608,:] = encoder_hidden_states[:,:-512,:]
+                    hidden_states_list = torch.cat([encoder_hidden_states_list, hidden_states_list],dim=1)
+                    hidden_states[:,-4608:,:] = hidden_states_list[:,-4608:,:]
                 else:
                     hidden_states = F.scaled_dot_product_attention(
                         query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
