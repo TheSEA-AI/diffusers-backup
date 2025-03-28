@@ -2582,7 +2582,7 @@ class FluxAttnProcessor2_0:
                 encoder_hidden_states_list = torch.cat(encoder_hidden_states_list, dim=1)
                 hidden_states = torch.cat([encoder_hidden_states_list, hidden_states],dim=1)
                 hidden_states[:,:-4608,:] = encoder_hidden_states[:,:-512,:]
-                print(f'hidden_states[:,:-4608,:] shape={hidden_states[:,:-4608,:].shape}')
+                #print(f'hidden_states[:,:-4608,:] shape={hidden_states[:,:-4608,:].shape}')
             else:
                 hidden_states = F.scaled_dot_product_attention(
                     query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
@@ -2621,8 +2621,8 @@ class FluxAttnProcessor2_0:
                     
                     encoder_hidden_states_list = torch.cat(encoder_hidden_states_list, dim=1)
                     hidden_states_list = torch.cat([encoder_hidden_states_list, hidden_states_list],dim=1)
-                    hidden_states[:,-4608:,:] = hidden_states_list[:,-4608:,:]
-                    print(f'hidden_states[:,-4608:,:] shape={hidden_states[:,-4608:,:].shape}')
+                    #hidden_states[:,-4608:,:] = hidden_states_list[:,-4608:,:]
+                    #print(f'hidden_states[:,-4608:,:] shape={hidden_states[:,-4608:,:].shape}')
                 else:
                     hidden_states = F.scaled_dot_product_attention(
                         query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
