@@ -2567,7 +2567,7 @@ class FluxAttnProcessor2_0:
                         512,
                         hidden_states.shape[2],
                     )   
-                    mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
+                    mask_downsample_t2i = mask_downsample.to(dtype=query.dtype, device=query.device)
 
                     mask_downsample_i2t = IPAdapterMaskProcessor.downsample(
                         tmp_mask,
@@ -2575,7 +2575,7 @@ class FluxAttnProcessor2_0:
                         hidden_states.shape[1],
                         512,
                     )   
-                    mask_downsample_i2t = mask_downsample_i2t.to(dtype=query.dtype, device=query.device)
+                    mask_downsample_i2t = mask_downsample.to(dtype=query.dtype, device=query.device)
                     attention_mask[:512,512:] = mask_downsample_t2i[0,:,:]
                     attention_mask[512:,:512] = mask_downsample_i2t[0,:,:]
                     
@@ -2614,7 +2614,7 @@ class FluxAttnProcessor2_0:
                             512,
                             hidden_states.shape[2],
                         )   
-                        mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
+                        mask_downsample_t2i = mask_downsample.to(dtype=query.dtype, device=query.device)
 
                         mask_downsample_i2t = IPAdapterMaskProcessor.downsample(
                             tmp_mask,
@@ -2622,7 +2622,7 @@ class FluxAttnProcessor2_0:
                             hidden_states.shape[1],
                             512,
                         )   
-                        mask_downsample_i2t = mask_downsample_i2t.to(dtype=query.dtype, device=query.device)
+                        mask_downsample_i2t = mask_downsample.to(dtype=query.dtype, device=query.device)
                         attention_mask[:512,512:] = mask_downsample_t2i[0,:,:]
                         attention_mask[512:,:512] = mask_downsample_i2t[0,:,:]
                         
