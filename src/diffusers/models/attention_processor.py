@@ -2413,9 +2413,9 @@ class FluxAttnProcessor2_0:
             key = apply_rotary_emb(key, image_rotary_emb)
 
         if prod_masks is not None:
-            attention_mask = torch.zeros(query.size(-2), key.size(-2))
-            self_attend_masks = torch.zeros((4096, 4096))
-            union_masks = torch.zeros((4096, 4096))
+            attention_mask = torch.zeros(query.size(-2), key.size(-2), device=query.device)
+            self_attend_masks = torch.zeros((4096, 4096), device=query.device)
+            union_masks = torch.zeros((4096, 4096), device=query.device)
             for index in range(len(prod_masks)):
                 attention_mask[index*512:(index+1)*512, index*512:(index+1)*512] = torch.ones(512, 512)
                 mask_downsample_t2i = IPAdapterMaskProcessor.downsample(
@@ -2423,17 +2423,18 @@ class FluxAttnProcessor2_0:
                     1,
                     4096,
                     1,
-                )  
+                )
+                mask_downsample_t2i = mask_downsample_t2i.to(device=query.device)
                 mask_downsample_t2i = mask_downsample_t2i.squeeze()
                 mask_downsample_t2i[mask_downsample_t2i<0.5] = 0
                 mask_downsample_t2i[mask_downsample_t2i>=0.5] = 1
-                mask_downsample_t2i_tensor = mask_downsample_t2i.repeat(512, 1)
-                mask_downsample_t2i_tensor_transpose = mask_downsample_t2i_tensor.transpose(0, 1)
+                mask_downsample_t2i_tensor = mask_downsample_t2i.repeat(512, 1).to(device=query.device)
+                mask_downsample_t2i_tensor_transpose = mask_downsample_t2i_tensor.transpose(0, 1).to(device=query.device)
                 attention_mask[index*512:(index+1)*512,-4096:] = mask_downsample_t2i_tensor
                 attention_mask[-4096:, index*512:(index+1)*512] = mask_downsample_t2i_tensor_transpose
 
-                img_size_masks = mask_downsample_t2i_tensor_transpose[:, :1].repeat(1, 4096)
-                img_size_masks_transpose = img_size_masks.transpose(-1, -2)
+                img_size_masks = mask_downsample_t2i_tensor_transpose[:, :1].repeat(1, 4096).to(device=query.device)
+                img_size_masks_transpose = img_size_masks.transpose(-1, -2).to(device=query.device)
                 self_attend_masks = torch.logical_or(self_attend_masks, 
                                                         torch.logical_and(img_size_masks, img_size_masks_transpose))
                 union_masks = torch.logical_or(union_masks, 
