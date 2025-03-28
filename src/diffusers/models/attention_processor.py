@@ -2423,11 +2423,19 @@ class FluxAttnProcessor2_0:
                     1,
                 )  
                 mask_downsample_t2i = mask_downsample_t2i.squeeze()
+                mask_downsample_t2i[mask_downsample_t2i<0.5] = 0
+                mask_downsample_t2i[mask_downsample_t2i>=0.5] = 1
                 mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
                 attention_mask[index*512:(index+1)*512,-4096:] += mask_downsample_t2i
                 attention_mask[-4096:, index*512:(index+1)*512] = attention_mask[index*512:(index+1)*512,-4096:].transpose(0, 1)
                 
             attention_mask[-4096:,-4096:] = torch.ones(4096, 4096, dtype=query.dtype, device=query.device)
+
+            zero_index = attention_mask == 0.0
+            one_index = attention_mask == 1
+            neg_inf_bf16 = torch.tensor(float('-inf'), dtype=torch.bfloat16)
+            attention_mask = attention_mask.masked_fill(zero_indexk, neg_inf_bf16)
+            attention_mask = attention_mask.masked_fill(one_index, 0.0)
 
         hidden_states = F.scaled_dot_product_attention(
             query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
