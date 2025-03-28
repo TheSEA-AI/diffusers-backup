@@ -2565,14 +2565,14 @@ class FluxAttnProcessor2_0:
                         tmp_mask,
                         1,
                         512,
-                        hidden_states.shape[1],
+                        4096,
                     )   
                     mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
 
                     mask_downsample_i2t = IPAdapterMaskProcessor.downsample(
                         tmp_mask,
                         1,
-                        hidden_states.shape[1],
+                        4096,
                         512,
                     )   
                     mask_downsample_i2t = mask_downsample_i2t.to(dtype=query.dtype, device=query.device)
@@ -2612,14 +2612,14 @@ class FluxAttnProcessor2_0:
                             prod_masks[index],
                             1,
                             512,
-                            hidden_states.shape[1],
+                            4096,
                         )   
                         mask_downsample_t2i = mask_downsample_t2i.to(dtype=query.dtype, device=query.device)
 
                         mask_downsample_i2t = IPAdapterMaskProcessor.downsample(
                             prod_masks[index],
                             1,
-                            hidden_states.shape[1],
+                            4096,
                             512,
                         )   
                         mask_downsample_i2t = mask_downsample_i2t.to(dtype=query.dtype, device=query.device)
