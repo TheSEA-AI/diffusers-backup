@@ -323,7 +323,6 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
         ids = torch.cat((txt_ids, img_ids), dim=0)
         image_rotary_emb = self.pos_embed(ids)
 
-        print(f'controlnet_flux before transformer_blocks encoder_hidden_states shape={encoder_hidden_states.shape}')
         block_samples = ()
         for index_block, block in enumerate(self.transformer_blocks):
             if torch.is_grad_enabled() and self.gradient_checkpointing:
@@ -345,10 +344,8 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                 )
             block_samples = block_samples + (hidden_states,)
 
-        print(f'controlnet_flux before single block encoder_hidden_states shape={encoder_hidden_states.shape}')
         hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
-        print(f'controlnet_flux before single block hidden_states shape={hidden_states.shape}')
-
+        
         single_block_samples = ()
         for index_block, block in enumerate(self.single_transformer_blocks):
             if torch.is_grad_enabled() and self.gradient_checkpointing:

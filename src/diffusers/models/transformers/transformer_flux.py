@@ -479,7 +479,6 @@ class FluxTransformer2DModel(
             ip_hidden_states = self.encoder_hid_proj(ip_adapter_image_embeds)
             joint_attention_kwargs.update({"ip_hidden_states": ip_hidden_states})
 
-        print(f'transformer_flux before transformer_blocks encoder_hidden_states shape={encoder_hidden_states.shape}')
         for index_block, block in enumerate(self.transformer_blocks):
             if torch.is_grad_enabled() and self.gradient_checkpointing:
                 encoder_hidden_states, hidden_states = self._gradient_checkpointing_func(
@@ -511,10 +510,8 @@ class FluxTransformer2DModel(
                 else:
                     hidden_states = hidden_states + controlnet_block_samples[index_block // interval_control]
         
-        print(f'transformer_flux before single block encoder_hidden_states shape={encoder_hidden_states.shape}')
         hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
-        print(f'transformer_flux before single block hidden_states shape={hidden_states.shape}')
-
+        
         for index_block, block in enumerate(self.single_transformer_blocks):
             if torch.is_grad_enabled() and self.gradient_checkpointing:
                 hidden_states = self._gradient_checkpointing_func(
