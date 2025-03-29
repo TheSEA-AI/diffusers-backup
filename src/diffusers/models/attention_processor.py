@@ -594,7 +594,7 @@ class Attention(nn.Module):
         # For standard processors that are defined here, `**cross_attention_kwargs` is empty
 
         attn_parameters = set(inspect.signature(self.processor.__call__).parameters.keys())
-        quiet_attn_parameters = {"text_masks", "ip_adapter_masks", "ip_hidden_states"}
+        quiet_attn_parameters = {"text_masks", "ip_adapter_masks", "ip_hidden_states", "mask_injection_steps", "first_k_blocks"}
         unused_kwargs = [
             k for k, _ in cross_attention_kwargs.items() if k not in attn_parameters and k not in quiet_attn_parameters
         ]
@@ -2416,7 +2416,7 @@ class FluxAttnProcessor2_0:
 
         # thesea modified for text mask
         if txt_masks is not None:
-            if ip_img is None:
+            if not ip_img:
                 if not txt_masks.shape[0] == int((query.shape[2] - 4096)/512) - 1:
                     raise ValueError(
                         f"Length of text masks ({txt_masks.shape[0]}) must match "
