@@ -342,7 +342,7 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                         encoder_hidden_states=encoder_hidden_states,
                         temb=temb,
                         image_rotary_emb=image_rotary_emb,
-                        #joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
+                        joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
                     )
                 else:
                     encoder_hidden_states, hidden_states = block(
@@ -374,7 +374,7 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                         hidden_states=hidden_states,
                         temb=temb,
                         image_rotary_emb=image_rotary_emb,
-                        #joint_attention_kwargs=joint_attention_kwargs if (index_block + 19) <= joint_attention_kwargs['first_k_blocks'] else None,
+                        joint_attention_kwargs=joint_attention_kwargs if (index_block + 19) <= joint_attention_kwargs['first_k_blocks'] else None,
                     )
                 else:
                     hidden_states = block(
