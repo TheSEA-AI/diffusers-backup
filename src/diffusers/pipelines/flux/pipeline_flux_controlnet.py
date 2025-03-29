@@ -1077,7 +1077,7 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
 
         # 7. Denoising loop
         # thesea modified for text mask
-        if mask_injection_steps in self.joint_attention_kwargs:
+        if 'mask_injection_steps' in self.joint_attention_kwargs:
             mask_injection_steps = self.joint_attention_kwargs['mask_injection_steps']
         else:
             mask_injection_steps = 10000

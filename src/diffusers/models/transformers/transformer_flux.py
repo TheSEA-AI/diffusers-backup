@@ -490,6 +490,7 @@ class FluxTransformer2DModel(
                 )
 
             else:
+                print(f'double block index:{index_block}')
                 # thesea modified for text mask
                 if 'first_k_blocks' in joint_attention_kwargs:
                     encoder_hidden_states, hidden_states = block(
@@ -533,6 +534,7 @@ class FluxTransformer2DModel(
 
             else:
                 # thesea modified for text mask
+                print(f'single block index:{index_block}')
                 if 'first_k_blocks' in joint_attention_kwargs:
                     hidden_states = block(
                         hidden_states=hidden_states,
