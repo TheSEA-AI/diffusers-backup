@@ -335,6 +335,7 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                 )
 
             else:
+                # thesea modified for text mask
                 if 'first_k_blocks' in joint_attention_kwargs:
                     encoder_hidden_states, hidden_states = block(
                         hidden_states=hidden_states,
@@ -367,6 +368,7 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                 )
 
             else:
+                # thesea modified for text mask
                 if 'first_k_blocks' in joint_attention_kwargs:
                     hidden_states = block(
                         hidden_states=hidden_states,
