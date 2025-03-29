@@ -1076,6 +1076,10 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
             )
 
         # 7. Denoising loop
+        if mask_injection_steps in self.joint_attention_kwargs:
+            mask_injection_steps = self.joint_attention_kwargs['mask_injection_steps']
+        else:
+            mask_injection_steps = 10000
         with self.progress_bar(total=num_inference_steps) as progress_bar:
             for i, t in enumerate(timesteps):
                 if self.interrupt:
@@ -1114,7 +1118,7 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
                     encoder_hidden_states=prompt_embeds,
                     txt_ids=text_ids,
                     img_ids=latent_image_ids,
-                    joint_attention_kwargs=self.joint_attention_kwargs,
+                    joint_attention_kwargs=self.joint_attention_kwargs if i <= mask_injection_steps else None,
                     return_dict=False,
                 )
 
@@ -1133,7 +1137,7 @@ class FluxControlNetPipeline(DiffusionPipeline, FluxLoraLoaderMixin, FromSingleF
                     controlnet_single_block_samples=controlnet_single_block_samples,
                     txt_ids=text_ids,
                     img_ids=latent_image_ids,
-                    joint_attention_kwargs=self.joint_attention_kwargs,
+                    joint_attention_kwargs=self.joint_attention_kwargs if i <= mask_injection_steps else None,
                     return_dict=False,
                     controlnet_blocks_repeat=controlnet_blocks_repeat,
                 )[0]

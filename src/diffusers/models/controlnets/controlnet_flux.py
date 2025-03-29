@@ -335,13 +335,23 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                 )
 
             else:
-                encoder_hidden_states, hidden_states = block(
-                    hidden_states=hidden_states,
-                    encoder_hidden_states=encoder_hidden_states,
-                    temb=temb,
-                    image_rotary_emb=image_rotary_emb,
-                    joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
-                )
+                if 'first_k_blocks' in joint_attention_kwargs:
+                    encoder_hidden_states, hidden_states = block(
+                        hidden_states=hidden_states,
+                        encoder_hidden_states=encoder_hidden_states,
+                        temb=temb,
+                        image_rotary_emb=image_rotary_emb,
+                        joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
+                    )
+                else:
+                    encoder_hidden_states, hidden_states = block(
+                        hidden_states=hidden_states,
+                        encoder_hidden_states=encoder_hidden_states,
+                        temb=temb,
+                        image_rotary_emb=image_rotary_emb,
+                        joint_attention_kwargs=joint_attention_kwargs,
+                    )
+
             block_samples = block_samples + (hidden_states,)
 
         hidden_states = torch.cat([encoder_hidden_states, hidden_states], dim=1)
@@ -357,12 +367,21 @@ class FluxControlNetModel(ModelMixin, ConfigMixin, PeftAdapterMixin):
                 )
 
             else:
-                hidden_states = block(
-                    hidden_states=hidden_states,
-                    temb=temb,
-                    image_rotary_emb=image_rotary_emb,
-                    joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
-                )
+                if 'first_k_blocks' in joint_attention_kwargs:
+                    hidden_states = block(
+                        hidden_states=hidden_states,
+                        temb=temb,
+                        image_rotary_emb=image_rotary_emb,
+                        joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
+                    )
+                else:
+                    hidden_states = block(
+                        hidden_states=hidden_states,
+                        temb=temb,
+                        image_rotary_emb=image_rotary_emb,
+                        joint_attention_kwargs=joint_attention_kwargs,
+                    )
+
             single_block_samples = single_block_samples + (hidden_states[:, encoder_hidden_states.shape[1] :],)
 
         # controlnet block

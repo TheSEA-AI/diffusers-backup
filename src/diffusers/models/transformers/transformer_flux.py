@@ -490,13 +490,22 @@ class FluxTransformer2DModel(
                 )
 
             else:
-                encoder_hidden_states, hidden_states = block(
-                    hidden_states=hidden_states,
-                    encoder_hidden_states=encoder_hidden_states,
-                    temb=temb,
-                    image_rotary_emb=image_rotary_emb,
-                    joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
-                )
+                if 'first_k_blocks' in joint_attention_kwargs:
+                    encoder_hidden_states, hidden_states = block(
+                        hidden_states=hidden_states,
+                        encoder_hidden_states=encoder_hidden_states,
+                        temb=temb,
+                        image_rotary_emb=image_rotary_emb,
+                        joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
+                    )
+                else:
+                    encoder_hidden_states, hidden_states = block(
+                        hidden_states=hidden_states,
+                        encoder_hidden_states=encoder_hidden_states,
+                        temb=temb,
+                        image_rotary_emb=image_rotary_emb,
+                        joint_attention_kwargs=joint_attention_kwargs,
+                    )
 
             # controlnet residual
             if controlnet_block_samples is not None:
@@ -522,12 +531,20 @@ class FluxTransformer2DModel(
                 )
 
             else:
-                hidden_states = block(
-                    hidden_states=hidden_states,
-                    temb=temb,
-                    image_rotary_emb=image_rotary_emb,
-                    joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
-                )
+                if 'first_k_blocks' in joint_attention_kwargs:
+                    hidden_states = block(
+                        hidden_states=hidden_states,
+                        temb=temb,
+                        image_rotary_emb=image_rotary_emb,
+                        joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs['first_k_blocks'] else None,
+                    )
+                else:
+                    hidden_states = block(
+                        hidden_states=hidden_states,
+                        temb=temb,
+                        image_rotary_emb=image_rotary_emb,
+                        joint_attention_kwargs=joint_attention_kwargs,
+                    )
 
             # controlnet residual
             if controlnet_single_block_samples is not None:
