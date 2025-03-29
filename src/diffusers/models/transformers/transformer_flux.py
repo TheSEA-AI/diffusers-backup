@@ -491,7 +491,7 @@ class FluxTransformer2DModel(
 
             else:
                 # thesea modified for text mask
-                if 'first_k_blocks' in joint_attention_kwargs:
+                if joint_attention_kwargs is not None and 'first_k_blocks' in joint_attention_kwargs:
                     encoder_hidden_states, hidden_states = block(
                         hidden_states=hidden_states,
                         encoder_hidden_states=encoder_hidden_states,
@@ -533,7 +533,7 @@ class FluxTransformer2DModel(
 
             else:
                 # thesea modified for text mask
-                if 'first_k_blocks' in joint_attention_kwargs:
+                if joint_attention_kwargs is not None and 'first_k_blocks' in joint_attention_kwargs:
                     hidden_states = block(
                         hidden_states=hidden_states,
                         temb=temb,
