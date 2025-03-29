@@ -2417,6 +2417,12 @@ class FluxAttnProcessor2_0:
         # thesea modified for text mask
         if txt_masks is not None:
             if ip_img is None:
+                if not txt_masks.shape[0] == int((query.shape[2] - 4096)/512) - 1:
+                    raise ValueError(
+                        f"Length of text masks ({txt_masks.shape[0]}) must match "
+                        f"the number of text prompts "
+                        f"({int((query.shape[2] - 4096)/512)-1})")
+                        
                 attention_mask = torch.zeros(query.size(-2)-512, key.size(-2)-512, device=query.device)
                 self_attend_masks = torch.zeros((4096, 4096), device=query.device)
                 union_masks = torch.zeros((4096, 4096), device=query.device)
@@ -2470,7 +2476,22 @@ class FluxAttnProcessor2_0:
                 hidden_states_common = hidden_states_region[:,:,-4096:,:]*(1-scene_ratio) + hidden_states_base[:,:,-4096:,:]*scene_ratio
                 hidden_states = torch.cat([hidden_states_region[:,:,:len(txt_masks)*512,:], hidden_states_base[:,:,-4608:-4096,:], hidden_states_common], dim=2)
             else:
-                attention_mask = torch.zeros(query.size(-2)-1241, key.size(-2)-1241, device=query.device)
+                num_of_prompts = int((query.shape[2] - 4825)/512)
+                if num_of_prompts > 1:
+                    if not txt_masks.shape[0] == int((query.shape[2] - 4825)/512) - 1:
+                        raise ValueError(
+                            f"Length of text masks ({txt_masks.shape[0]}) must match "
+                            f"the number of text prompts "
+                            f"({int((query.shape[2] - 4825)/512)-1})")
+                    attention_mask = torch.zeros(query.size(-2)-1241, key.size(-2)-1241, device=query.device)
+                else:
+                    if not txt_masks.shape[0] == int((query.shape[2] - 4825)/512):
+                        raise ValueError(
+                            f"Length of text masks ({txt_masks.shape[0]}) must match "
+                            f"the number of text prompts "
+                            f"({int((query.shape[2] - 4825)/512)})")
+                    attention_mask = torch.zeros(query.size(-2)-729, key.size(-2)-729, device=query.device)
+
                 self_attend_masks = torch.zeros((4096, 4096), device=query.device)
                 union_masks = torch.zeros((4096, 4096), device=query.device)
                 for index in range(len(txt_masks)):
@@ -2517,10 +2538,13 @@ class FluxAttnProcessor2_0:
                 )
                 
                 hidden_states_base = F.scaled_dot_product_attention(
-                    query[:,:,-5337:,:], key[:,:,-5337:,:], value[:,:,-5337:,:], attn_mask=None, dropout_p=0.0, is_causal=False
+                    query, key, value, attn_mask=None, dropout_p=0.0, is_causal=False
                 )
                 hidden_states_common = hidden_states_region[:,:,-4096:,:]*(1-scene_ratio) + hidden_states_base[:,:,-4096:,:]*scene_ratio
-                hidden_states = torch.cat([hidden_states_region[:,:,:len(txt_masks)*512,:], hidden_states_base[:,:,-5337:-4096,:], hidden_states_common], dim=2)
+                if num_of_prompts > 1:
+                    hidden_states = torch.cat([hidden_states_region[:,:,:len(txt_masks)*512,:], hidden_states_base[:,:,-5337:-4096,:], hidden_states_common], dim=2)
+                else:
+                    hidden_states = torch.cat([hidden_states_region[:,:,:512,:], hidden_states_base[:,:,512:1241,:], hidden_states_common], dim=2)
         else:
             hidden_states = F.scaled_dot_product_attention(
                 query, key, value, attn_mask=None, dropout_p=0.0, is_causal=False
