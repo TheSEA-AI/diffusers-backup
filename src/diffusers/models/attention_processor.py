@@ -2359,7 +2359,7 @@ class FluxAttnProcessor2_0:
         attention_mask: Optional[torch.FloatTensor] = None,
         image_rotary_emb: Optional[torch.Tensor] = None,
         prod_masks: Optional[torch.Tensor] = None, # thesea modification for text mask
-        base_ratio: Optional[float] = None, # thesea modification for text mask
+        scene_ratio: Optional[float] = None, # thesea modification for text mask
     ) -> torch.FloatTensor:
         batch_size, _, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states.shape
 
@@ -2453,21 +2453,25 @@ class FluxAttnProcessor2_0:
             attention_mask = attention_mask.masked_fill(one_index, 0)
             attention_mask = attention_mask.to(dtype=query.dtype, device=query.device)
 
+            hidden_states_region = F.scaled_dot_product_attention(
+                torch.cat([query[:,:,:len(prod_masks)*512,:], query[:,:,-4096:,:]], dim=2), 
+                torch.cat([key[:,:,:len(prod_masks)*512,:], key[:,:,-4096:,:]], dim=2), 
+                torch.cat([value[:,:,:len(prod_masks)*512,:], value[:,:,-4096:,:]], dim=2), 
+                attn_mask=attention_mask, 
+                dropout_p=0.0, 
+                is_causal=False
+            )
 
-        hidden_states_region = F.scaled_dot_product_attention(
-            torch.cat([query[:,:,:len(prod_masks)*512,:], query[:,:,-4096:,:]], dim=2), 
-            torch.cat([key[:,:,:len(prod_masks)*512,:], key[:,:,-4096:,:]], dim=2), 
-            torch.cat([value[:,:,:len(prod_masks)*512,:], value[:,:,-4096:,:]], dim=2), 
-            attn_mask=attention_mask, 
-            dropout_p=0.0, 
-            is_causal=False
-        )
+            hidden_states_base = F.scaled_dot_product_attention(
+                query[:,:,-4608:,:], key[:,:,-4608:,:], value[:,:,-4608:,:], attn_mask=None, dropout_p=0.0, is_causal=False
+            )
 
-        hidden_states_base = F.scaled_dot_product_attention(
-            query[:,:,-4608:,:], key[:,:,-4608:,:], value[:,:,-4608:,:], attn_mask=None, dropout_p=0.0, is_causal=False
-        )
-
-        hidden_states = hidden_states*(1-base_ratio) + hidden_states_base*base_ratio
+            hidden_states_common = hidden_states_region[:,:,-4096:,:]*(1-scene_ratio) + hidden_states_base[:,:,-4096:,:]*scene_ratio
+            hidden_states = torch.cat([hidden_states_region[:,:,:len(prod_masks)*512,:], hidden_states_base[:,:,-4608:-4096,:], hidden_states_common], dim=2)
+        else:
+            hidden_states = F.scaled_dot_product_attention(
+                query, key, value, attn_mask=None, dropout_p=0.0, is_causal=False
+            )
 
         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
         hidden_states = hidden_states.to(query.dtype)
