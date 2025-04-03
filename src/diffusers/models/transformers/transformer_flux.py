@@ -490,7 +490,7 @@ class FluxTransformer2DModel(
                 )
 
             else:
-                print(f'joint_attention_kwargs keys={joint_attention_kwargs.keys()}')
+                #print(f'joint_attention_kwargs keys={joint_attention_kwargs.keys()}')
                 if "first_N_blocks" in joint_attention_kwargs:
                     encoder_hidden_states, hidden_states = block(
                         hidden_states=hidden_states,
@@ -505,7 +505,7 @@ class FluxTransformer2DModel(
                         encoder_hidden_states=encoder_hidden_states,
                         temb=temb,
                         image_rotary_emb=image_rotary_emb,
-                        joint_attention_kwargs=joint_attention_kwargs,
+                        #joint_attention_kwargs=joint_attention_kwargs,
                     )
 
             # controlnet residual
