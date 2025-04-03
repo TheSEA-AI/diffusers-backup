@@ -490,7 +490,7 @@ class FluxTransformer2DModel(
                 )
 
             else:
-                print(f'joint_attention_kwargs keys={joint_attention_kwargs.key()}')
+                print(f'joint_attention_kwargs keys={joint_attention_kwargs.keys()}')
                 if "first_N_blocks" in joint_attention_kwargs:
                     encoder_hidden_states, hidden_states = block(
                         hidden_states=hidden_states,
