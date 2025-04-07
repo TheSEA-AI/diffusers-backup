@@ -526,14 +526,14 @@ class FluxTransformer2DModel(
                         hidden_states=hidden_states,
                         temb=temb,
                         image_rotary_emb=image_rotary_emb,
-                        joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs["first_N_blocks"] else None,
+                        #joint_attention_kwargs=joint_attention_kwargs if index_block <= joint_attention_kwargs["first_N_blocks"] else None,
                     )
                 else:
                     hidden_states = block(
                         hidden_states=hidden_states,
                         temb=temb,
                         image_rotary_emb=image_rotary_emb,
-                        joint_attention_kwargs=joint_attention_kwargs,
+                        #joint_attention_kwargs=joint_attention_kwargs,
                     )
 
             # controlnet residual
