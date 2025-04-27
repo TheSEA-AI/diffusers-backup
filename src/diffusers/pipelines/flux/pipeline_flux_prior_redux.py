@@ -542,12 +542,15 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
                 prod_masks.append(Image.fromarray(image_mask_prod[tmp_mask].astype(np.uint8)*255).convert('RGB'))
             
             image_latents_bg = self.encode_image(composed_bg_image, device, 1)
+            image_latents_all = self.encode_image(composed_image_all, device, 1)
             image_latents_prods = []
             for composed_prod_image in composed_prod_images:
                 image_latents_prods.append(self.encode_image(composed_prod_image, device, 1))
             
             image_embeds_bg = self.image_embedder(image_latents_bg).image_embeds
+            image_embeds_all = self.image_embedder(image_latents_all).image_embeds
             image_embeds_bg = image_embeds_bg.to(device=device)
+            image_embeds_all = image_embeds_all.to(device=device)
 
             image_embeds_prods = []
             for image_latents_prod in image_latents_prods:
@@ -613,7 +616,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
                     raise ValueError(
                         f"number of prompts ({len(prompt_embeds_list)-1}) must match the number of product images {len(image_embeds_prods)}"
                     )
-                prompt_embeds = torch.cat([prompt_embeds_list[-1], image_embeds_bg[:,:int(729*bg_ratio),:]], dim=1)
+                prompt_embeds = torch.cat([prompt_embeds_list[-1], image_embeds_all], dim=1)
                 for tmp_prompt_embeds, tmp_image_embeds_prod in zip(reversed(prompt_embeds_list[:-1]), reversed(image_embeds_prods)):
                     prompt_embeds = torch.cat([tmp_prompt_embeds, tmp_image_embeds_prod[:,:int(729*product_ratio),:], prompt_embeds], dim=1)
             else:  
