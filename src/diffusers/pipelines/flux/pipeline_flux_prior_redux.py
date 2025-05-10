@@ -581,8 +581,9 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
                 image_embeds = image_embeds.to(device=device)
                 image_embeds_list.append(image_embeds)
             image_embeds = torch.stack(image_embeds_list,dim=0)
+            print(f'image_embeds shape1 = {image_embeds.shape}')
             image_embeds = torch.mean(image_embeds,dim=0)
-            print(f'image_embeds shape = {image_embeds.shape}')
+            print(f'image_embeds shape2 = {image_embeds.shape}')
         else:
             image = image.convert('RGB')
             image_latents = self.encode_image(image, device, 1)
