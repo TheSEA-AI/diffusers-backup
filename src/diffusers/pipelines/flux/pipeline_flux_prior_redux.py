@@ -399,6 +399,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
         mask_value: Optional[int] = 255, # controlnet inpainting
         image_width: Optional[int] = 1024,
         image_height: Optional[int] = 1024,
+        is_outpaint: Optional[bool] = False, #thesea modiffied for flux outpaint
         return_dict: bool = True,
     ):
         r"""
@@ -569,6 +570,16 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
                 image_embeds_prod = self.image_embedder(image_latents_prod).image_embeds
                 image_embeds_prod = image_embeds_prod.to(device=device)
                 image_embeds_prods.append(image_embeds_prod)
+        elif is_outpaint:
+            image_embeds_list = []
+            for img in image:
+                img = img.convert('RGB')
+                image_latents = self.encode_image(img, device, 1)
+                image_embeds = self.image_embedder(image_latents).image_embeds
+                image_embeds = image_embeds.to(device=device)
+                image_embeds_list.append(image_embeds)
+            image_embeds = torch.cat(image_embeds_list, dim=1)
+            print(f'image_embeds shape = {image_embeds.shape}')
         else:
             image = image.convert('RGB')
             image_latents = self.encode_image(image, device, 1)
