@@ -643,6 +643,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
             for tmp_prompt_embeds, tmp_image_embeds_prod in zip(reversed(prompt_embeds_list), reversed(image_embeds_prods)):
                 prompt_embeds = torch.cat([tmp_prompt_embeds, tmp_image_embeds_prod[:,:int(729*product_ratio),:], prompt_embeds], dim=1)
         else:
+            print(f'prompt_embeds shape = {prompt_embeds.shape}, image_embeds shape={image_embeds.shape}')
             prompt_embeds = torch.cat([prompt_embeds, image_embeds], dim=1)
         
         prompt_embeds *= torch.tensor(prompt_embeds_scale, device=device, dtype=prompt_embeds.dtype)[:, None, None]
