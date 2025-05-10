@@ -453,6 +453,8 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
             # theseam modified
             if product_ratio is not None:
                 batch_size = 1
+            elif is_outpaint:
+                batch_size = 1
             else:
                 batch_size = len(image)
         else:
