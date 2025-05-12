@@ -400,6 +400,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
         image_width: Optional[int] = 1024,
         image_height: Optional[int] = 1024,
         return_dict: bool = True,
+        is_human_element_model : Optional[bool] = False, # thesea modified for human element model
     ):
         r"""
         Function invoked when calling the pipeline for generation.
@@ -631,9 +632,12 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
             prompt_embeds = image_embeds_bg
             for tmp_prompt_embeds, tmp_image_embeds_prod in zip(reversed(prompt_embeds_list), reversed(image_embeds_prods)):
                 prompt_embeds = torch.cat([tmp_prompt_embeds, tmp_image_embeds_prod[:,:int(729*product_ratio),:], prompt_embeds], dim=1)
+        elif is_human_element_model:
+            prompt_embeds = torch.cat([prompt_embeds, image_embeds[:,:8,:]], dim=1)
         else:
             prompt_embeds = torch.cat([prompt_embeds, image_embeds], dim=1)
         
+        print(f'prompt_embeds shape = {prompt_embeds.shape}')
         prompt_embeds *= torch.tensor(prompt_embeds_scale, device=device, dtype=prompt_embeds.dtype)[:, None, None]
         pooled_prompt_embeds *= torch.tensor(pooled_prompt_embeds_scale, device=device, dtype=prompt_embeds.dtype)[
             :, None
