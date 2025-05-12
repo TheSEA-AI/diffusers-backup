@@ -757,6 +757,9 @@ class FluxControlPipeline(
             lora_scale=lora_scale,
         )
 
+        if self.joint_attention_kwargs is None:
+            self._joint_attention_kwargs = {}
+
         # 4. Prepare latent variables
         num_channels_latents = self.transformer.config.in_channels // 8
 
