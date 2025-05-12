@@ -131,15 +131,6 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
     ):
         super().__init__()
 
-        self.tokenizer = CLIPTokenizer.from_pretrained(
-            "black-forest-labs/FLUX.1-dev",
-            subfolder="tokenizer",
-        )
-        self.tokenizer_2 = T5TokenizerFast.from_pretrained(
-            "black-forest-labs/FLUX.1-dev",
-            subfolder="tokenizer_2",
-        )
-
         self.register_modules(
             image_encoder=image_encoder,
             feature_extractor=feature_extractor,
@@ -149,6 +140,16 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
             text_encoder_2=text_encoder_2,
             tokenizer_2=tokenizer_2,
         )
+
+        self.tokenizer = CLIPTokenizer.from_pretrained(
+            "black-forest-labs/FLUX.1-dev",
+            subfolder="tokenizer",
+        )
+        self.tokenizer_2 = T5TokenizerFast.from_pretrained(
+            "black-forest-labs/FLUX.1-dev",
+            subfolder="tokenizer_2",
+        )
+        
         self.tokenizer_max_length = (
             self.tokenizer.model_max_length if hasattr(self, "tokenizer") and self.tokenizer is not None else 77
         )
