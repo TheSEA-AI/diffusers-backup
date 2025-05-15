@@ -2365,7 +2365,7 @@ class FluxAttnProcessor2_0:
         txt_masks: Optional[torch.Tensor] = None, # thesea modified for text mask
     ) -> torch.FloatTensor:
         batch_size, _, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states.shape
-
+        print(a)
         # `sample` projections.
         query = attn.to_q(hidden_states)
         key = attn.to_k(hidden_states)
