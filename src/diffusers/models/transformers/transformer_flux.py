@@ -490,31 +490,13 @@ class FluxTransformer2DModel(
                 )
 
             else:
-                if 'first_N_blocks' in joint_attention_kwargs: # first N blocks is for multiple copies of single prod only
-                    if index_block < joint_attention_kwargs['first_N_blocks']:
-                        encoder_hidden_states, hidden_states = block(
-                            hidden_states=hidden_states,
-                            encoder_hidden_states=encoder_hidden_states,
-                            temb=temb,
-                            image_rotary_emb=image_rotary_emb,
-                            joint_attention_kwargs=joint_attention_kwargs,
-                        )
-                    else:
-                        encoder_hidden_states, hidden_states = block(
-                            hidden_states=hidden_states,
-                            encoder_hidden_states=encoder_hidden_states,
-                            temb=temb,
-                            image_rotary_emb=image_rotary_emb,
-                            #joint_attention_kwargs=joint_attention_kwargs,
-                        )
-                else:
-                    encoder_hidden_states, hidden_states = block(
-                        hidden_states=hidden_states,
-                        encoder_hidden_states=encoder_hidden_states,
-                        temb=temb,
-                        image_rotary_emb=image_rotary_emb,
-                        joint_attention_kwargs=joint_attention_kwargs,
-                    )
+                encoder_hidden_states, hidden_states = block(
+                    hidden_states=hidden_states,
+                    encoder_hidden_states=encoder_hidden_states,
+                    temb=temb,
+                    image_rotary_emb=image_rotary_emb,
+                    joint_attention_kwargs=joint_attention_kwargs,
+                )
 
             # controlnet residual
             if controlnet_block_samples is not None:
@@ -539,44 +521,36 @@ class FluxTransformer2DModel(
                 )
 
             else:
-                if 'first_N_blocks' not in joint_attention_kwargs: # first N blocks is for multiple copies of single prod only
-                    if 'is_qv' in joint_attention_kwargs:
-                        if ('is_multiprod' in joint_attention_kwargs) or ('fix_bg' in joint_attention_kwargs):
-                            hidden_states = block(
-                                hidden_states=hidden_states,
-                                temb=temb,
-                                image_rotary_emb=image_rotary_emb,
-                                joint_attention_kwargs=joint_attention_kwargs,
-                            )
-                        else:
-                            hidden_states = block(
-                                hidden_states=hidden_states,
-                                temb=temb,
-                                image_rotary_emb=image_rotary_emb,
-                                #joint_attention_kwargs=joint_attention_kwargs,
-                            )
+                if 'is_qv' in joint_attention_kwargs:
+                    if ('is_multiprod' in joint_attention_kwargs) or ('fix_bg' in joint_attention_kwargs):
+                        hidden_states = block(
+                            hidden_states=hidden_states,
+                            temb=temb,
+                            image_rotary_emb=image_rotary_emb,
+                            joint_attention_kwargs=joint_attention_kwargs,
+                        )
                     else:
-                        if 'is_multiprod' in joint_attention_kwargs:
-                            hidden_states = block(
-                                    hidden_states=hidden_states,
-                                    temb=temb,
-                                    image_rotary_emb=image_rotary_emb,
-                                    joint_attention_kwargs=joint_attention_kwargs,
-                            )
-                        else:
-                            hidden_states = block(
-                                    hidden_states=hidden_states,
-                                    temb=temb,
-                                    image_rotary_emb=image_rotary_emb,
-                                    #joint_attention_kwargs=joint_attention_kwargs,
-                            )
-                else:
-                    hidden_states = block(
+                        hidden_states = block(
                             hidden_states=hidden_states,
                             temb=temb,
                             image_rotary_emb=image_rotary_emb,
                             #joint_attention_kwargs=joint_attention_kwargs,
-                    )
+                        )
+                else:
+                    if 'is_multiprod' in joint_attention_kwargs:
+                        hidden_states = block(
+                                hidden_states=hidden_states,
+                                temb=temb,
+                                image_rotary_emb=image_rotary_emb,
+                                joint_attention_kwargs=joint_attention_kwargs,
+                        )
+                    else:
+                        hidden_states = block(
+                                hidden_states=hidden_states,
+                                temb=temb,
+                                image_rotary_emb=image_rotary_emb,
+                                #joint_attention_kwargs=joint_attention_kwargs,
+                        )
 
             # controlnet residual
             if controlnet_single_block_samples is not None:
