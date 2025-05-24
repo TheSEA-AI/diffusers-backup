@@ -2591,6 +2591,11 @@ class FluxAttnProcessor2_0:
                 prod_mask_downsample = prod_mask_downsample.to(dtype=query.dtype, device=query.device)
                 prod_mask_downsamples.append(prod_mask_downsample)
             start_time = time.time()
+            print("query shape: ", query[:,:,-4825:,:].shape)
+            print("key shape: ", key[:,:,-4825:,:].shape)
+            print("value shape: ", value[:,:,-4825:,:].shape)
+            print("query dtype: ", query.dtype)
+            print("key dtype: ", key.dtype)
             hidden_states_img = F.scaled_dot_product_attention(
                 query[:,:,-4825:,:], 
                 key[:,:,-4825:,:], 
