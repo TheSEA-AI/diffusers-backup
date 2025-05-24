@@ -11,7 +11,7 @@ from transformers import (
     T5EncoderModel,
     T5TokenizerFast,
 )
-
+import time
 from ...image_processor import PipelineImageInput, VaeImageProcessor
 from ...loaders import FluxLoraLoaderMixin, FromSingleFileMixin, TextualInversionLoaderMixin
 from ...models.autoencoders import AutoencoderKL
@@ -1209,6 +1209,7 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
                 else:
                     guidance = None
 
+                start_time = time.time()
                 noise_pred = self.transformer(
                     hidden_states=latents,
                     timestep=timestep / 1000,
@@ -1223,7 +1224,8 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
                     return_dict=False,
                     controlnet_blocks_repeat=controlnet_blocks_repeat,
                 )[0]
-
+                end_time = time.time()
+                print(f'time elipse = {end_time - start_time}')
                 # compute the previous noisy sample x_t -> x_t-1
                 latents_dtype = latents.dtype
                 latents = self.scheduler.step(noise_pred, t, latents, return_dict=False)[0]
