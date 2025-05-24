@@ -16,7 +16,7 @@ import math
 from typing import Callable, List, Optional, Tuple, Union
 import copy
 import numpy as np
-
+import time
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -2417,6 +2417,7 @@ class FluxAttnProcessor2_0:
             key = apply_rotary_emb(key, image_rotary_emb)
 
         # thesea modified for txt prompt masks
+        start_time = time.time()
         if txt_masks is not None:
             prod_embeds_dim = 512
             num_of_prompts = int ((query.size(-2) - 4096)/prod_embeds_dim)
@@ -2617,6 +2618,8 @@ class FluxAttnProcessor2_0:
             hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
             hidden_states = hidden_states.to(query.dtype)
 
+        end_time = time.time()
+        print(f'attn time elipse = {end_time - start_time}')
         if encoder_hidden_states is not None:
             encoder_hidden_states, hidden_states = (
                 hidden_states[:, : encoder_hidden_states.shape[1]],
