@@ -1037,8 +1037,8 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
             )
         latent_timestep = timesteps[:1].repeat(batch_size * num_images_per_prompt)
 
-        #if self.joint_attention_kwargs is None:
-        #    self._joint_attention_kwargs = {}
+        if self.joint_attention_kwargs is None:
+            self._joint_attention_kwargs = {}
             
         # 7. Prepare latent variables
 
