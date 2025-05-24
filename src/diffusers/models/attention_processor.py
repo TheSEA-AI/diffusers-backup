@@ -2365,7 +2365,7 @@ class FluxAttnProcessor2_0:
         txt_masks: Optional[torch.Tensor] = None, # thesea modified for text mask
     ) -> torch.FloatTensor:
         batch_size, _, _ = hidden_states.shape if encoder_hidden_states is None else encoder_hidden_states.shape
-        print('test info')
+        print('test info1')
         # `sample` projections.
         query = attn.to_q(hidden_states)
         key = attn.to_k(hidden_states)
@@ -2499,6 +2499,7 @@ class FluxAttnProcessor2_0:
             hidden_states = torch.cat([hidden_states_region[:,:-4096,:], hidden_states_common], dim=1) 
         # thesea modified for quick validation of product shots    
         elif is_qv:
+            print('test info2')
             attention_mask = torch.zeros(query.size(-2), key.size(-2), device=query.device)
             prod_embeds_dim = 512 + int(729 * product_ratio)
             num_of_prompts = int ((query.size(-2) - 729 - 4096)/prod_embeds_dim)
