@@ -2417,7 +2417,6 @@ class FluxAttnProcessor2_0:
             key = apply_rotary_emb(key, image_rotary_emb)
 
         # thesea modified for txt prompt masks
-        start_time = time.time()
         if txt_masks is not None:
             prod_embeds_dim = 512
             num_of_prompts = int ((query.size(-2) - 4096)/prod_embeds_dim)
@@ -2550,6 +2549,7 @@ class FluxAttnProcessor2_0:
             attention_mask = attention_mask.masked_fill(one_index, 0)
             attention_mask = attention_mask.to(dtype=query.dtype, device=query.device)
 
+            start_time = time.time()
             hidden_states_region = F.scaled_dot_product_attention(
                 query, 
                 key, 
@@ -2558,6 +2558,8 @@ class FluxAttnProcessor2_0:
                 dropout_p=0.0, 
                 is_causal=False
             )
+            end_time = time.time()
+            print(f'attn time elipse 1 = {end_time - start_time}')
             hidden_states_region = hidden_states_region.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
             hidden_states_region = hidden_states_region.to(query.dtype)
                 
@@ -2565,6 +2567,7 @@ class FluxAttnProcessor2_0:
             hidden_states_prods = []
             prod_mask_downsamples = []
             for index in range(len(prod_masks)):
+                start_time = time.time()
                 hidden_states_tmp = F.scaled_dot_product_attention(
                     torch.cat([query[:,:,index*prod_embeds_dim:(index+1)*prod_embeds_dim,:], query[:,:,-4096:,:]], dim=2), 
                     torch.cat([key[:,:,index*prod_embeds_dim:(index+1)*prod_embeds_dim,:], key[:,:,-4096:,:]], dim=2), 
@@ -2573,6 +2576,8 @@ class FluxAttnProcessor2_0:
                     dropout_p=0.0, 
                     is_causal=False
                 )
+                end_time = time.time()
+                print(f'attn time elipse 2 = {end_time - start_time}')
                 hidden_states_tmp = hidden_states_tmp.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
                 hidden_states_tmp = hidden_states_tmp.to(query.dtype)
                 hidden_states_prods.append(hidden_states_tmp)
@@ -2585,7 +2590,7 @@ class FluxAttnProcessor2_0:
                 ) 
                 prod_mask_downsample = prod_mask_downsample.to(dtype=query.dtype, device=query.device)
                 prod_mask_downsamples.append(prod_mask_downsample)
-                
+            start_time = time.time()
             hidden_states_img = F.scaled_dot_product_attention(
                 query[:,:,-4825:,:], 
                 key[:,:,-4825:,:], 
@@ -2594,6 +2599,8 @@ class FluxAttnProcessor2_0:
                 dropout_p=0.0, 
                 is_causal=False
             )
+            end_time = time.time()
+            print(f'attn time elipse 3 = {end_time - start_time}')
             hidden_states_img = hidden_states_img.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
             hidden_states_img = hidden_states_img.to(query.dtype)
 
@@ -2618,8 +2625,6 @@ class FluxAttnProcessor2_0:
             hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
             hidden_states = hidden_states.to(query.dtype)
 
-        end_time = time.time()
-        print(f'attn time elipse = {end_time - start_time}')
         if encoder_hidden_states is not None:
             encoder_hidden_states, hidden_states = (
                 hidden_states[:, : encoder_hidden_states.shape[1]],
