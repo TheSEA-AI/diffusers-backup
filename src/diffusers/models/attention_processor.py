@@ -2548,7 +2548,7 @@ class FluxAttnProcessor2_0:
             attention_mask = attention_mask.masked_fill(zero_index, float('-inf'))
             attention_mask = attention_mask.masked_fill(one_index, 0)
             attention_mask = attention_mask.to(dtype=query.dtype, device=query.device)
-
+            print("dtype: ", query.dtype)
             start_time = time.time()
             hidden_states_region = F.scaled_dot_product_attention(
                 query, 
