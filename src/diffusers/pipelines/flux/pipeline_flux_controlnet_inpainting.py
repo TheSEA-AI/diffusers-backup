@@ -1293,16 +1293,17 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
 
                 if image_ref is not None:
                     # version 1
-                    latents_1 = (1.0-ratio_ref) * ((1 - init_mask) * init_latents_proper + init_mask * latents)
-                    latents_2 = ratio_ref * ((1 - init_mask_ref) * init_latents_proper + init_mask_ref * init_latents_proper_ref)
-                    latents =  latents_1 + latents_2   
+                    #latents_1 = (1.0-ratio_ref) * ((1 - init_mask) * init_latents_proper + init_mask * latents)
+                    #latents_2 = ratio_ref * ((1 - init_mask_ref) * init_latents_proper + init_mask_ref * init_latents_proper_ref)
+                    #latents =  latents_1 + latents_2   
                     # version 2
                     #latents = (1 - init_mask) * init_latents_proper + init_mask * ((1.0-ratio_ref) * latents + ratio_ref * init_latents_proper_ref)
 
                     # version 3
-                    #latents_1 = ratio_ref * init_mask_ref * init_latents_proper_ref + (1.0 - ratio_ref) * (1.0 - init_mask_ref) * latents
-                    #latents_2 = ratio_ref * init_mask_ref * init_latents_proper_ref + (1.0 - ratio_ref) * (1.0 - init_mask_ref) * latents
-                    #latents_3 = init_latents_proper
+                    latents_1 = ratio_ref * init_mask_ref * init_latents_proper_ref + (1.0 - ratio_ref) * (1.0 - init_mask_ref) * latents
+                    latents_2 = (init_mask - init_mask_ref) * latents
+                    latents_3 = (1 - init_mask) * init_latents_proper
+                    latents =  latents_1 + latents_2 + latents_3
                 else:
                     latents = (1 - init_mask) * init_latents_proper + init_mask * latents
 
