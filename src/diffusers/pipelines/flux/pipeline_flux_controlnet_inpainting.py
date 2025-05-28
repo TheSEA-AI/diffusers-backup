@@ -1110,7 +1110,7 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
             return mask
 
         def apply_erosion_to_mask_image(mask,iterations=4):
-            kernel = np.ones((2, 2), np.uint8)
+            kernel = np.ones((3, 3), np.uint8)
             mask = np.array(mask, dtype=bool)
             mask = mask.astype(np.uint8)
             mask = cv2.erode(mask, kernel, iterations=iterations)
