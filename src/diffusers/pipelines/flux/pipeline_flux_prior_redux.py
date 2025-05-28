@@ -381,7 +381,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
 
     def apply_erosion_to_mask(self, mask,iterations = 3):
 
-        kernel = np.ones((5, 5), np.uint8)
+        kernel = np.ones((6, 6), np.uint8)
         mask = mask.astype(np.uint8)
         mask = cv2.erode(mask, kernel, iterations=iterations)
         mask = np.array(mask, dtype=bool)
@@ -405,8 +405,8 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
         product_ratio: Optional[float] = None, # theseam modified for quick validation of product shots
         is_inpainting: Optional[bool] = False, # controlnet inpainting
         contains_element: Optional[bool] = False, # controlnet inpainting for element
-        iterations: Optional[int] = 10, # controlnet inpainting
-        erosion_iterations: Optional[int] = 3, # controlnet inpainting
+        iterations: Optional[int] = 10, # controlnet prod inpainting
+        erosion_iterations: Optional[int] = 3, # controlnet bg inpainting
         mask_value: Optional[int] = 255, # controlnet inpainting
         image_width: Optional[int] = 1024,
         image_height: Optional[int] = 1024,

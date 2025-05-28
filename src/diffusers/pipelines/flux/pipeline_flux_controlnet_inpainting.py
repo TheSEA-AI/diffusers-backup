@@ -770,8 +770,8 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
         callback_on_step_end: Optional[Callable[[int, int, Dict], None]] = None,
         callback_on_step_end_tensor_inputs: List[str] = ["latents"],
         max_sequence_length: int = 512,
-        iterations: Optional[int] = 3,
-        iterations_erosion: Optional[int] = 3,
+        iterations: Optional[int] = 4, # iterations for prod inpainting mask
+        iterations_erosion: Optional[int] = 1, # iterations for bg inpainting mask
     ):
         """
         Function invoked when calling the pipeline for generation.
