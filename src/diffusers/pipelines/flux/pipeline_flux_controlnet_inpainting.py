@@ -1291,12 +1291,13 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
                             init_latents_proper_ref, torch.tensor([noise_timestep]), noise
                         )
 
-                latents = (1 - init_mask) * init_latents_proper + init_mask * latents
                 if image_ref is not None:
                     latents = (1.0-ratio_ref) * ((1 - init_mask) * init_latents_proper + init_mask * latents)
                     latents += ratio_ref * ((1 - init_mask_ref) * init_latents_proper + init_mask_ref * init_latents_proper_ref)
                     #latents = (1 - init_mask) * init_latents_proper + init_mask * ((1.0-ratio_ref) * latents + ratio_ref * init_latents_proper_ref)
-
+                else:
+                    latents = (1 - init_mask) * init_latents_proper + init_mask * latents
+                    
                 if latents.dtype != latents_dtype:
                     if torch.backends.mps.is_available():
                         # some platforms (eg. apple mps) misbehave due to a pytorch bug: https://github.com/pytorch/pytorch/pull/99272
