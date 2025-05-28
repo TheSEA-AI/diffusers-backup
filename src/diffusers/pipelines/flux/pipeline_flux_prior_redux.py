@@ -379,9 +379,9 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
 
         return mask
 
-    def apply_erosion_to_mask(self, mask,iterations = 3):
+    def apply_erosion_to_mask(self, mask,iterations = 4):
 
-        kernel = np.ones((6, 6), np.uint8)
+        kernel = np.ones((5, 5), np.uint8)
         mask = mask.astype(np.uint8)
         mask = cv2.erode(mask, kernel, iterations=iterations)
         mask = np.array(mask, dtype=bool)
