@@ -1189,7 +1189,10 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
         for index in range(mask_tensor_ref.shape[0]):
             mask_tensor_ref[index,:,:] = tmp_tensor_ref
 
-        mask = mask_tensor.to(device=latents.device, dtype=latents.dtype)
+        if image_ref is None:
+            mask = mask_tensor.to(device=latents.device, dtype=latents.dtype)
+        else:
+            mask = mask.to(device=latents.device, dtype=latents.dtype)
         mask_ref = mask_tensor_ref.to(device=latents.device, dtype=latents.dtype)
 
         controlnet_keep = []
