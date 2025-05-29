@@ -406,7 +406,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
         is_inpainting: Optional[bool] = False, # controlnet inpainting
         contains_element: Optional[bool] = False, # controlnet inpainting for element
         iterations: Optional[int] = 10, # controlnet prod inpainting
-        erosion_iterations: Optional[int] = 5, # controlnet bg inpainting
+        erosion_iterations: Optional[int] = 5, # controlnet bg inpainting, the larger, better fusion with bg
         mask_value: Optional[int] = 255, # controlnet inpainting
         image_width: Optional[int] = 1024,
         image_height: Optional[int] = 1024,
