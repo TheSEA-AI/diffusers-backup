@@ -744,8 +744,8 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
         prompt_2: Optional[Union[str, List[str]]] = None,
         image: PipelineImageInput = None,
         image_ref: PipelineImageInput = None,
-        ratio_ref: Optional[float] = 0.3,
-        ratio_gap: Optional[float] = 1.0,
+        ratio_ref: Optional[float] = 0.1,
+        ratio_gap: Optional[float] = 0.04,
         mask_image: PipelineImageInput = None,
         masked_image_latents: PipelineImageInput = None,
         control_image: PipelineImageInput = None,
@@ -1306,7 +1306,7 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
 
                     # version 2
                     latents_1 = ratio_ref * init_mask_ref * init_latents_proper_ref + (1.0 - ratio_ref) * init_mask_ref * latents
-                    latents_2 = ratio_gap * (init_mask - init_mask_ref) * latents + (1.0 - ratio_gap) * (init_mask - init_mask_ref) * init_latents_proper
+                    latents_2 = (1.0 - ratio_gap) * (init_mask - init_mask_ref) * latents + ratio_gap * (init_mask - init_mask_ref) * init_latents_proper
                     latents_3 = (1 - init_mask) * init_latents_proper
                     latents =  latents_1 + latents_2 + latents_3
                 else:
