@@ -1303,6 +1303,7 @@ class FluxControlNetInpaintPipeline(DiffusionPipeline, FluxLoraLoaderMixin, From
                     latents_1 = ratio_ref * init_mask_ref * init_latents_proper_ref + (1.0 - ratio_ref) * init_mask_ref * latents
                     latents_2 = (init_mask - init_mask_ref) * latents
                     latents_3 = (1 - init_mask) * init_latents_proper
+                    print(f'mask uniques values = {torch.unique(init_mask)}')
                     latents =  latents_1 + latents_2 + latents_3
                 else:
                     latents = (1 - init_mask) * init_latents_proper + init_mask * latents
