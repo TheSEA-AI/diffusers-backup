@@ -368,6 +368,7 @@ else:
             "FluxFillPipeline",
             "FluxImg2ImgPipeline",
             "FluxInpaintPipeline",
+            "FluxKontextInpaintPipeline",
             "FluxPipeline",
             "FluxPriorReduxPipeline",
             "HiDreamImagePipeline",

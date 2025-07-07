@@ -35,6 +35,8 @@ else:
     _import_structure["pipeline_flux_img2img"] = ["FluxImg2ImgPipeline"]
     _import_structure["pipeline_flux_inpaint"] = ["FluxInpaintPipeline"]
     _import_structure["pipeline_flux_prior_redux"] = ["FluxPriorReduxPipeline"]
+    #_import_structure["pipeline_flux_kontext"] = ["FluxKontextPipeline"]
+    _import_structure["pipeline_flux_kontext_inpaint"] = ["FluxKontextInpaintPipeline"]
 if TYPE_CHECKING or DIFFUSERS_SLOW_IMPORT:
     try:
         if not (is_transformers_available() and is_torch_available()):
@@ -55,6 +57,7 @@ if TYPE_CHECKING or DIFFUSERS_SLOW_IMPORT:
         from .pipeline_flux_img2img import FluxImg2ImgPipeline 
         from .pipeline_flux_inpaint import FluxInpaintPipeline
         from .pipeline_flux_prior_redux import FluxPriorReduxPipeline
+        from .pipeline_flux_kontext_inpaint import FluxKontextInpaintPipeline
 else:
     import sys
 
