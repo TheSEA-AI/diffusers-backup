@@ -490,6 +490,10 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
                 raise ValueError(
                     f"number of images ({len(image)}) must match the number of layers {len(layer_type)}"
                 )
+            if len(image) != len(transparency_list):
+                raise ValueError(
+                    f"number of images ({len(image)}) must match the number of transparent values {len(transparency_list)}"
+                )
             
             for img, img_type in zip(image, layer_type):
                 if 'product' in img_type or 'Product' in img_type:
