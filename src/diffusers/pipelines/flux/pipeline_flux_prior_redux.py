@@ -410,6 +410,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
         iterations_erosion: Optional[int] = 8, # modified for injecting original prod image
         mask_value: Optional[int] = 255, # controlnet inpainting
         transparency_list: Optional[list[float]] = None, # for controlling transparency
+        user_provided_masks: Optional[dict] = None, # for controlling transparency
         image_width: Optional[int] = 1024,
         image_height: Optional[int] = 1024,
         return_dict: bool = True,
@@ -490,10 +491,18 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
                 raise ValueError(
                     f"number of images ({len(image)}) must match the number of layers {len(layer_type)}"
                 )
-            if len(image) != len(transparency_list):
-                raise ValueError(
-                    f"number of images ({len(image)}) must match the number of transparent values {len(transparency_list)}"
-                )
+
+            if transparency_list is not None:
+                if len(image) != len(transparency_list):
+                    raise ValueError(
+                        f"number of images ({len(image)}) must match the number of transparent values {len(transparency_list)}"
+                    )
+
+            if user_provided_masks is not None:
+                if len(image) != len(user_provided_masks):
+                    raise ValueError(
+                        f"number of images ({len(image)}) must match the number of user provided masks {len(user_provided_masks)}"
+                    )
             
             for img, img_type in zip(image, layer_type):
                 if 'product' in img_type or 'Product' in img_type:
@@ -560,36 +569,59 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
             composed_prod_images = []
             composed_prod_images_all = np.zeros((image_width, image_height, 3))
 
-            bg_array = None
-            bg_mask = None
-            product_masks = []
-            product_transparencies = []
-            for index, (is_product, img_array, transparency) in enumerate(zip(is_product_list, image_array_list, transparency_list)):
-                if is_product.lower() == "true":
-                    composed_prod_images.append(Image.fromarray((img_array*255).astype(np.uint8)))
-                    composed_prod_images_all += img_array * image_mask_prod[index]
-                else:
-                    composed_bg_image += img_array * image_mask_bg[index]
-                
-                if is_product.lower() == "true":
-                    composed_image_all += img_array * image_mask_all[index] * (1.0 - transparency)
-                    product_masks.append(image_mask_all[index])
-                    product_transparencies.append(transparency)
-                else:
+            if transparency_list is not None:
+                bg_array = None
+                product_masks = []
+                product_transparencies = []
+                for index, (is_product, img_array, transparency) in enumerate(zip(is_product_list, image_array_list, transparency_list)):
+                    if is_product.lower() == "true":
+                        composed_prod_images.append(Image.fromarray((img_array*255).astype(np.uint8)))
+                        composed_prod_images_all += img_array * image_mask_prod[index]
+                    else:
+                        composed_bg_image += img_array * image_mask_bg[index]
+                    
+                    if user_provided_masks is None:
+                        if is_product.lower() == "true":
+                            composed_image_all += img_array * image_mask_all[index] * (1.0 - transparency)
+                            product_masks.append(image_mask_all[index])
+                            product_transparencies.append(transparency)
+                        else:
+                            composed_image_all += img_array * image_mask_all[index]
+                            bg_array =  img_array
+                    else:
+                        if is_product.lower() == "true":
+                            composed_image_all += img_array * (image_mask_all[index] & (~user_provided_masks[index])) #* (1.0 - transparency)
+                            composed_image_all += img_array * user_provided_masks[index] * (1.0 - transparency)
+                            product_masks.append(user_provided_masks[index])
+                            product_transparencies.append(transparency)
+                        else:
+                            composed_image_all += img_array * image_mask_all[index]
+                            bg_array =  img_array
+
+                    if is_product.lower() == "true":
+                        masked_bg += mask_value*np.ones((image_width, image_height, 3)) * self.apply_dilate_to_mask(image_mask_all[index], iterations=iterations)
+                        masked_bg_original_array.append(mask_value*np.ones((image_width, image_height, 3)) * self.apply_erosion_to_mask(image_mask_all[index], iterations=iterations_erosion))
+
+                    if index > 0:
+                        masked_bg_with_element += mask_value*np.ones((image_width, image_height, 3)) * self.apply_dilate_to_mask(image_mask_all[index], iterations=iterations)
+
+                for (product_mask, product_transparency) in zip(product_masks, product_transparencies):
+                    composed_image_all += bg_array * product_mask * product_transparency
+            else:
+                for index, (is_product, img_array) in enumerate(zip(is_product_list, image_array_list)):
+                    if is_product.lower() == "true":
+                        composed_prod_images.append(Image.fromarray((img_array*255).astype(np.uint8)))
+                        composed_prod_images_all += img_array * image_mask_prod[index]
+                    else:
+                        composed_bg_image += img_array * image_mask_bg[index]
+                    
                     composed_image_all += img_array * image_mask_all[index]
-                    bg_array =  img_array
-                    bg_mask = image_mask_all[index]
+                    if is_product.lower() == "true":
+                        masked_bg += mask_value*np.ones((image_width, image_height, 3)) * self.apply_dilate_to_mask(image_mask_all[index], iterations=iterations)
+                        masked_bg_original_array.append(mask_value*np.ones((image_width, image_height, 3)) * self.apply_erosion_to_mask(image_mask_all[index], iterations=iterations_erosion))
 
-
-                if is_product.lower() == "true":
-                    masked_bg += mask_value*np.ones((image_width, image_height, 3)) * self.apply_dilate_to_mask(image_mask_all[index], iterations=iterations)
-                    masked_bg_original_array.append(mask_value*np.ones((image_width, image_height, 3)) * self.apply_erosion_to_mask(image_mask_all[index], iterations=iterations_erosion))
-
-                if index > 0:
-                    masked_bg_with_element += mask_value*np.ones((image_width, image_height, 3)) * self.apply_dilate_to_mask(image_mask_all[index], iterations=iterations)
-
-            for (product_mask, product_transparency) in zip(product_masks, product_transparencies):
-                composed_image_all += bg_array * product_mask * product_transparency
+                    if index > 0:
+                        masked_bg_with_element += mask_value*np.ones((image_width, image_height, 3)) * self.apply_dilate_to_mask(image_mask_all[index], iterations=iterations)
 
             composed_bg_image = Image.fromarray((composed_bg_image*255).astype(np.uint8)).convert('RGB')
             composed_prod_images_all = Image.fromarray((composed_prod_images_all*255).astype(np.uint8)).convert('RGB')
