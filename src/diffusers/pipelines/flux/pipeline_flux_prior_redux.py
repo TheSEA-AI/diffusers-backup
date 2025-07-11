@@ -574,9 +574,9 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
             composed_prod_images_all = Image.fromarray(composed_prod_images_all.astype(np.uint8)).convert('RGB')
 
             if shadow_mask is not None:
-                shadow_mask = np.all(shadow_mask == 255, axis=-1)
+                shadow_mask = np.all(shadow_mask > 128, axis=-1)
                 shadow_mask = np.stack((shadow_mask,)*3, axis=-1)
-                tmp_img = Image.new('RGB', img.size, (0, 0, 0)) 
+                tmp_img = Image.new('RGB', (1024,1024), (0, 0, 0)) 
                 composed_image_all = shadow_mask * tmp_img * 0.5 + shadow_mask * composed_image_all * 0.5 + (~shadow_mask) * composed_image_all
 
             composed_image_all = Image.fromarray(composed_image_all.astype(np.uint8)).convert('RGB')
