@@ -409,6 +409,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
         iterations: Optional[int] = 10, # controlnet inpainting
         iterations_erosion: Optional[int] = 8, # modified for injecting original prod image
         mask_value: Optional[int] = 255, # controlnet inpainting
+        shadow_mask: Optional[PipelineImageInput]=None, # added for enhancing shadow,
         image_width: Optional[int] = 1024,
         image_height: Optional[int] = 1024,
         return_dict: bool = True,
@@ -571,6 +572,13 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
 
             composed_bg_image = Image.fromarray(composed_bg_image.astype(np.uint8)).convert('RGB')
             composed_prod_images_all = Image.fromarray(composed_prod_images_all.astype(np.uint8)).convert('RGB')
+
+            if shadow_mask is not None:
+                shadow_mask = np.all(np.array(shadow_mask) > 128, axis=-1)
+                shadow_mask = np.stack((shadow_mask,)*3, axis=-1)
+                tmp_img = Image.new('RGB', (1024,1024), (0, 0, 0)) 
+                composed_image_all = shadow_mask * tmp_img * 0.5 + shadow_mask * composed_image_all * 0.5 + (~shadow_mask) * composed_image_all
+
             composed_image_all = Image.fromarray(composed_image_all.astype(np.uint8)).convert('RGB')
             masked_bg = Image.fromarray(masked_bg.astype(np.uint8)).convert('RGB')
             masked_bg_original = []
