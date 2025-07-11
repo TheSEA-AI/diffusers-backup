@@ -409,6 +409,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
         iterations: Optional[int] = 10, # controlnet inpainting
         iterations_erosion: Optional[int] = 8, # modified for injecting original prod image
         mask_value: Optional[int] = 255, # controlnet inpainting
+        transparency_list: Optional[list[float]] = None, # for controlling transparency
         image_width: Optional[int] = 1024,
         image_height: Optional[int] = 1024,
         return_dict: bool = True,
@@ -508,7 +509,7 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
                 tmp_img = Image.new('RGBA', img.size, (255, 255, 255, 255)) 
                 tmp_img.paste(img, mask=img.split()[3])
                 tmp_img = tmp_img.convert('RGB')
-                image_array = np.asarray(tmp_img)
+                image_array = np.asarray(tmp_img) / 255.0
                 image_array_list.append(image_array)
 
             bg_mask = np.full((image_width, image_height, 3), True, dtype=bool)
@@ -554,14 +555,28 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
             composed_bg_image = np.zeros((image_width, image_height, 3))
             composed_prod_images = []
             composed_prod_images_all = np.zeros((image_width, image_height, 3))
-            for index, (is_product, img_array) in enumerate(zip(is_product_list, image_array_list)):
+
+            bg_array = None
+            bg_mask = None
+            product_masks = []
+            product_transparencies = []
+            for index, (is_product, img_array, transparency) in enumerate(zip(is_product_list, image_array_list, transparency_list)):
                 if is_product.lower() == "true":
-                    composed_prod_images.append(Image.fromarray(img_array.astype(np.uint8)))
+                    composed_prod_images.append(Image.fromarray((img_array*255).astype(np.uint8)))
                     composed_prod_images_all += img_array * image_mask_prod[index]
                 else:
                     composed_bg_image += img_array * image_mask_bg[index]
                 
-                composed_image_all += img_array * image_mask_all[index]
+                if is_product.lower() == "true":
+                    composed_image_all += img_array * image_mask_all[index] * (1.0 - transparency)
+                    product_masks.append(image_mask_all[index])
+                    product_transparencies.append(transparency)
+                else:
+                    composed_image_all += img_array * image_mask_all[index]
+                    bg_array =  img_array
+                    bg_mask = image_mask_all[index]
+
+
                 if is_product.lower() == "true":
                     masked_bg += mask_value*np.ones((image_width, image_height, 3)) * self.apply_dilate_to_mask(image_mask_all[index], iterations=iterations)
                     masked_bg_original_array.append(mask_value*np.ones((image_width, image_height, 3)) * self.apply_erosion_to_mask(image_mask_all[index], iterations=iterations_erosion))
@@ -569,9 +584,12 @@ class FluxPriorReduxPipeline(DiffusionPipeline):
                 if index > 0:
                     masked_bg_with_element += mask_value*np.ones((image_width, image_height, 3)) * self.apply_dilate_to_mask(image_mask_all[index], iterations=iterations)
 
-            composed_bg_image = Image.fromarray(composed_bg_image.astype(np.uint8)).convert('RGB')
-            composed_prod_images_all = Image.fromarray(composed_prod_images_all.astype(np.uint8)).convert('RGB')
-            composed_image_all = Image.fromarray(composed_image_all.astype(np.uint8)).convert('RGB')
+            for (product_mask, product_transparency) in zip(product_masks, product_transparencies):
+                composed_image_all += bg_array * product_mask * product_transparency
+
+            composed_bg_image = Image.fromarray((composed_bg_image*255).astype(np.uint8)).convert('RGB')
+            composed_prod_images_all = Image.fromarray((composed_prod_images_all*255).astype(np.uint8)).convert('RGB')
+            composed_image_all = Image.fromarray((composed_image_all*255).astype(np.uint8)).convert('RGB')
             masked_bg = Image.fromarray(masked_bg.astype(np.uint8)).convert('RGB')
             masked_bg_original = []
             for tmp_masked_bg_original in masked_bg_original_array:
