@@ -40,6 +40,7 @@ from .lora_base import (  # noqa
 )
 from .lora_conversion_utils import (
     _convert_bfl_flux_control_lora_to_diffusers,
+    _convert_fal_kontext_lora_to_diffusers,
     _convert_hunyuan_video_lora_to_diffusers,
     _convert_kohya_flux_lora_to_diffusers,
     _convert_musubi_wan_lora_to_diffusers,
@@ -2003,6 +2004,7 @@ class FluxLoraLoaderMixin(LoraBaseMixin):
         subfolder = kwargs.pop("subfolder", None)
         weight_name = kwargs.pop("weight_name", None)
         use_safetensors = kwargs.pop("use_safetensors", None)
+        return_lora_metadata = kwargs.pop("return_lora_metadata", False)
 
         allow_pickle = False
         if use_safetensors is None:
@@ -2014,7 +2016,7 @@ class FluxLoraLoaderMixin(LoraBaseMixin):
             "framework": "pytorch",
         }
 
-        state_dict = _fetch_state_dict(
+        state_dict, metadata = _fetch_state_dict(
             pretrained_model_name_or_path_or_dict=pretrained_model_name_or_path_or_dict,
             weight_name=weight_name,
             use_safetensors=use_safetensors,
@@ -2050,8 +2052,25 @@ class FluxLoraLoaderMixin(LoraBaseMixin):
         is_bfl_control = any("query_norm.scale" in k for k in state_dict)
         if is_bfl_control:
             state_dict = _convert_bfl_flux_control_lora_to_diffusers(state_dict)
-            return (state_dict, None) if return_alphas else state_dict
+            return cls._prepare_outputs(
+                state_dict,
+                metadata=metadata,
+                alphas=None,
+                return_alphas=return_alphas,
+                return_metadata=return_lora_metadata,
+            )
 
+        is_fal_kontext = any("base_model" in k for k in state_dict)
+        if is_fal_kontext:
+            state_dict = _convert_fal_kontext_lora_to_diffusers(state_dict)
+            return cls._prepare_outputs(
+                state_dict,
+                metadata=metadata,
+                alphas=None,
+                return_alphas=return_alphas,
+                return_metadata=return_lora_metadata,
+            )
+        
         # For state dicts like
         # https://huggingface.co/TheLastBen/Jon_Snow_Flux_LoRA
         keys = list(state_dict.keys())
