@@ -25,7 +25,6 @@ from huggingface_hub import model_info
 from huggingface_hub.constants import HF_HUB_OFFLINE
 
 from ..models.modeling_utils import ModelMixin, load_state_dict
-from ..utils.state_dict_utils import _load_sft_state_dict_metadata
 from ..utils import (
     USE_PEFT_BACKEND,
     _get_model_file,
@@ -207,7 +206,6 @@ def _fetch_state_dict(
     subfolder,
     user_agent,
     allow_pickle,
-    metadata=None,
 ):
     model_file = None
     if not isinstance(pretrained_model_name_or_path_or_dict, dict):
@@ -238,14 +236,11 @@ def _fetch_state_dict(
                     user_agent=user_agent,
                 )
                 state_dict = safetensors.torch.load_file(model_file, device="cpu")
-                metadata = _load_sft_state_dict_metadata(model_file)
-
             except (IOError, safetensors.SafetensorError) as e:
                 if not allow_pickle:
                     raise e
                 # try loading non-safetensors weights
                 model_file = None
-                metadata = None
                 pass
 
         if model_file is None:
@@ -266,11 +261,10 @@ def _fetch_state_dict(
                 user_agent=user_agent,
             )
             state_dict = load_state_dict(model_file)
-            metadata = None
     else:
         state_dict = pretrained_model_name_or_path_or_dict
 
-    return state_dict, metadata
+    return state_dict
 
 
 def _best_guess_weight_name(
